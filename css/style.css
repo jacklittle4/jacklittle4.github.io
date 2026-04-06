@@ -813,4 +813,12 @@ select:focus-visible {
   .home-actions .btn-accent {
     width: 100%;
   }
+  .home-heading {
+  text-align: center;
+}
+
+.home-heading p {
+  max-width: 700px;
+  margin: 0.5rem auto 0;
+}
 }
