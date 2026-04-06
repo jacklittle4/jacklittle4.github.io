@@ -1,42 +1,89 @@
 ---
 layout: default
-title: Courses
-permalink: /courses/
+title: Home
+permalink: /
 ---
 
-<section class="page-hero">
-  <p class="eyebrow">Courses</p>
-  <h1>Coursework</h1>
-  <p class="page-intro">
-    A snapshot of the mathematics, physics, and technical coursework shaping my background.
-  </p>
+<section class="hero">
+  <div class="hero-content">
+    <p class="hero-kicker">Engineering Physics • Computational Projects • Research</p>
+    <h1>Jack Little</h1>
+    <p class="hero-subtitle">
+      Physics, computation, and interactive visualizations. This site collects my
+      projects, simulations, research interests, and coursework in one place.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="/projects/" class="btn btn-primary">View Projects</a>
+      <a href="/about/" class="btn btn-secondary">About Me</a>
+    </div>
+  </div>
 </section>
 
-<section class="courses">
-  <article class="category">
-    <h2>Mathematics</h2>
-    <ul class="course-list">
-      <li><span class="code">MATH</span><span class="name">Calculus I–III</span><span class="sep"></span><span class="desc">Core calculus sequence and multivariable work</span></li>
-      <li><span class="code">MATH</span><span class="name">Discrete Mathematics</span><span class="sep"></span><span class="desc">Proof-based and structural mathematical thinking</span></li>
-      <li><span class="code">MATH</span><span class="name">Planned: Linear Algebra / Differential Equations</span></li>
-    </ul>
-  </article>
+<section class="home-section">
+  <div class="section-heading">
+    <h2>Featured Projects</h2>
+    <p>Interactive tools and simulations built around physics and mathematics.</p>
+  </div>
 
-  <article class="category">
-    <h2>Physics</h2>
-    <ul class="course-list">
-      <li><span class="code">PHYS</span><span class="name">General Physics I–II</span><span class="sep"></span><span class="desc">Mechanics, E&amp;M, and foundational physics</span></li>
-      <li><span class="code">PHYS</span><span class="name">Statics / Dynamics</span><span class="sep"></span><span class="desc">Mechanical systems and engineering applications</span></li>
-      <li><span class="code">PHYS</span><span class="name">Modern Physics / Electronics / Mathematical Methods</span></li>
-    </ul>
-  </article>
+  <div class="project-grid">
+    <a href="/fourier/" class="project-card">
+      <div class="card-glow"></div>
+      <h3>Fourier Transform Visualizer</h3>
+      <p>
+        Upload audio and explore its frequency spectrum with interactive plots and
+        mathematical context.
+      </p>
+      <span class="card-link">Open Project →</span>
+    </a>
 
-  <article class="category">
-    <h2>Technical direction</h2>
-    <ul class="course-list">
-      <li><span class="code">ENGT</span><span class="name">Circuit and instrumentation-related work</span></li>
-      <li><span class="code">COMP</span><span class="name">Programming projects in Python, Java, and web development</span></li>
-      <li><span class="code">LAB</span><span class="name">Coursework supporting experimental and computational physics skills</span></li>
-    </ul>
-  </article>
+    <a href="/wave/" class="project-card">
+      <div class="card-glow"></div>
+      <h3>Wave Interference Simulation</h3>
+      <p>
+        Visualize superposition, interference patterns, and wave behavior through a
+        real-time simulation.
+      </p>
+      <span class="card-link">Open Project →</span>
+    </a>
+
+    <a href="/field/" class="project-card">
+      <div class="card-glow"></div>
+      <h3>Magnetic Field Plotter</h3>
+      <p>
+        Explore the magnetic field around a current-carrying wire with vector-based
+        visualization.
+      </p>
+      <span class="card-link">Open Project →</span>
+    </a>
+  </div>
+</section>
+
+<section class="home-section info-panels">
+  <div class="info-card">
+    <h3>Research</h3>
+    <p>
+      My interests include astrophysics, cosmology, quantum systems, and computational
+      physics, with a focus on building strong theoretical and numerical foundations.
+    </p>
+    <a href="/research/">Go to Research →</a>
+  </div>
+
+  <div class="info-card">
+    <h3>Courses</h3>
+    <p>
+      A record of coursework in physics, mathematics, electronics, and related areas
+      that support my long-term research goals.
+    </p>
+    <a href="/courses/">Go to Courses →</a>
+  </div>
+
+  <div class="info-card">
+    <h3>About Me</h3>
+    <p>
+      I am an engineering physics student interested in using computation and theory
+      to study physical systems and eventually pursue graduate research.
+    </p>
+    <a href="/about/">Learn More →</a>
+  </div>
 </section>
