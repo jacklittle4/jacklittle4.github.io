@@ -1,85 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Home — Jack Little</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0a0b12" />
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+---
+layout: default
+title: Home
+permalink: /
+---
 
-  <nav class="navbar">
-    <ul>
-      <li><a href="index.html" class="is-active">Home</a></li>
-      <li><a href="fourier.html">Fourier</a></li>
-      <li><a href="wave.html">Wave</a></li>
-      <li><a href="field.html">Field</a></li>
-      <li><a href="research.html">Research</a></li>
-      <li><a href="courses.html">Courses</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="blackhole_antiparticles.html">Black Hole</a></li>
-      <li>
-        <button class="btn" onclick="toggleTheme()" aria-label="Toggle theme">
-          🌓 Toggle Theme
-        </button>
-      </li>
-    </ul>
-  </nav>
+<header>
+  <h1>Jack Little</h1>
+  <p>• Physics Projects •</p>
+</header>
 
-  <main id="main">
-    <header>
-      <h1>Jack Little</h1>
-      <p>• Physics Projects •</p>
-    </header>
+<section class="projects">
+  <a href="/fourier/" class="project-link">
+    <div class="project-card">
+      <h2>Fourier Transform Visualizer</h2>
+      <p>Upload a wave file and see its frequency breakdown in real time.</p>
+    </div>
+  </a>
 
-    <section class="projects">
-      <a href="fourier.html" class="project-link">
-        <div class="project-card">
-          <h2>Fourier Transform Visualizer</h2>
-          <p>Upload a wave file and see its frequency breakdown in real time.</p>
-        </div>
-      </a>
+  <a href="/wave/" class="project-link">
+    <div class="project-card">
+      <h2>Wave Interference Simulation</h2>
+      <p>Real-time visual of 2-source interference patterns on canvas.</p>
+    </div>
+  </a>
 
-      <a href="wave.html" class="project-link">
-        <div class="project-card">
-          <h2>Wave Interference Simulation</h2>
-          <p>Real-time visual of 2-source interference patterns on canvas.</p>
-        </div>
-      </a>
-
-      <a href="field.html" class="project-link">
-        <div class="project-card">
-          <h2>Magnetic Field Plotter</h2>
-          <p>Vector field visualization around wires using Ampère’s law.</p>
-        </div>
-      </a>
-    </section>
-  </main>
-
-  <footer>
-    <div>&copy; 2025 Jack Little • Hosted on GitHub Pages</div>
-  </footer>
-
-  <script src="js/main.js"></script>
-
-  <script>
-    (function () {
-      const root = document.documentElement;
-      const KEY = 'site-theme';
-      const saved = localStorage.getItem(KEY);
-
-      if (saved === 'light' || saved === 'dark') {
-        root.setAttribute('data-theme', saved);
-      }
-
-      window.toggleTheme = function () {
-        const current = root.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        root.setAttribute('data-theme', next);
-        localStorage.setItem(KEY, next);
-      };
-    })();
-  </script>
-</body>
-</html>
+  <a href="/field/" class="project-link">
+    <div class="project-card">
+      <h2>Magnetic Field Plotter</h2>
+      <p>Vector field visualization around wires using Ampère’s law.</p>
+    </div>
+  </a>
+</section>
