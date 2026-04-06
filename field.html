@@ -1,48 +1,572 @@
----
-layout: default
-title: Magnetic Field Plotter
-permalink: /field/
-plotly: true
----
-
-<header>
-  <h1>Magnetic Field Plotter</h1>
-  <p>Vector field around a current-carrying wire</p>
-</header>
-
-<section class="upload-section" style="max-width: 1100px; margin: 0 auto;">
-  <div id="fieldPlot" style="width: 100%; height: 70vh; min-height: 500px;"></div>
-</section>
-
-<script>
-  const x = [], y = [], u = [], v = [];
-
-  for (let i = -10; i <= 10; i++) {
-    for (let j = -10; j <= 10; j++) {
-      const dx = -j;
-      const dy = i;
-      const r2 = dx * dx + dy * dy + 0.1;
-      const mag = 5 / r2;
-
-      x.push(i);
-      y.push(j);
-      u.push(mag * dx);
-      v.push(mag * dy);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magnetic Field Explorer | Jack Little</title>
+  <style>
+    :root {
+      --bg: #070b16;
+      --panel: rgba(15, 20, 40, 0.78);
+      --panel-border: rgba(120, 170, 255, 0.18);
+      --text: #eef3ff;
+      --muted: #a9b7d9;
+      --accent: #7fd6ff;
+      --accent-2: #9b8cff;
+      --wire: #ff8c69;
+      --grid: rgba(255,255,255,0.06);
+      --shadow: 0 20px 50px rgba(0,0,0,0.35);
     }
-  }
 
-  Plotly.newPlot('fieldPlot', [{
-    type: 'quiver',
-    x: x,
-    y: y,
-    u: u,
-    v: v,
-    line: { color: 'cyan' },
-    scale: 0.1
-  }], {
-    title: 'Magnetic Field Vectors',
-    paper_bgcolor: '#0b0c1a',
-    plot_bgcolor: '#0b0c1a',
-    font: { color: '#e0e0e0' }
-  });
-</script>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(80,120,255,0.14), transparent 35%),
+        linear-gradient(180deg, #060814 0%, #0a1020 55%, #05070d 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page {
+      width: min(1200px, 92vw);
+      margin: 0 auto;
+      padding: 40px 0 60px;
+    }
+
+    .hero {
+      padding: 28px 28px 18px;
+      margin-bottom: 24px;
+      border: 1px solid var(--panel-border);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(20,26,52,0.82), rgba(10,14,28,0.72));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.3rem);
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(127, 214, 255, 0.12);
+      border: 1px solid rgba(127, 214, 255, 0.18);
+      color: var(--accent);
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .controls {
+      padding: 22px;
+      position: sticky;
+      top: 24px;
+    }
+
+    .controls h2,
+    .info h2 {
+      margin: 0 0 18px;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .control-group span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #8bd9ff;
+      cursor: pointer;
+    }
+
+    .toggle-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.1);
+    }
+
+    button.active {
+      background: linear-gradient(135deg, rgba(127,214,255,0.18), rgba(155,140,255,0.18));
+      border-color: rgba(127,214,255,0.35);
+      color: white;
+    }
+
+    .canvas-wrap {
+      padding: 18px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(120,180,255,0.08), transparent 42%),
+        linear-gradient(180deg, #09101f, #050915);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .info {
+      margin-top: 20px;
+      padding: 22px;
+    }
+
+    .info p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .equation {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-family: "Times New Roman", serif;
+      color: #e8f2ff;
+      overflow-x: auto;
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      font-size: 0.92rem;
+      color: #90a4ce;
+    }
+
+    @media (max-width: 950px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero panel">
+      <div class="badge">Interactive Physics Demo</div>
+      <h1>Magnetic Field Explorer</h1>
+      <p>
+        This page visualizes the magnetic field around a long straight current-carrying wire.
+        Instead of a simple static plot, this version lets you change the current strength,
+        reverse the current direction, adjust field density, and show field lines and vectors
+        in real time.
+      </p>
+    </section>
+
+    <section class="layout">
+      <aside class="controls panel">
+        <h2>Controls</h2>
+
+        <div class="control-group">
+          <label for="currentSlider">
+            Current strength
+            <span id="currentValue">1.0</span>
+          </label>
+          <input type="range" id="currentSlider" min="0.2" max="3" step="0.1" value="1.0" />
+        </div>
+
+        <div class="control-group">
+          <label for="densitySlider">
+            Vector density
+            <span id="densityValue">18</span>
+          </label>
+          <input type="range" id="densitySlider" min="10" max="28" step="1" value="18" />
+        </div>
+
+        <div class="control-group">
+          <label for="scaleSlider">
+            Arrow length
+            <span id="scaleValue">1.0</span>
+          </label>
+          <input type="range" id="scaleSlider" min="0.4" max="2" step="0.1" value="1.0" />
+        </div>
+
+        <div class="control-group">
+          <label>Current direction</label>
+          <div class="toggle-row">
+            <button id="outBtn" class="active">Out of page</button>
+            <button id="intoBtn">Into page</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>Display options</label>
+          <div class="toggle-row">
+            <button id="vectorsBtn" class="active">Vectors</button>
+            <button id="linesBtn" class="active">Field lines</button>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          The wire is shown at the center. Use the right-hand rule to compare the direction of circulation.
+        </div>
+      </aside>
+
+      <div>
+        <div class="canvas-wrap panel">
+          <canvas id="fieldCanvas" width="900" height="680"></canvas>
+        </div>
+
+        <section class="info panel">
+          <h2>What this shows</h2>
+          <p>
+            For a long straight wire, the magnetic field wraps in concentric circles around the wire.
+            The direction depends on the current direction. If the current points out of the page,
+            the field circulates counterclockwise; if the current points into the page, it circulates clockwise.
+          </p>
+          <div class="equation">
+            |B| ∝ I / r
+            <br><br>
+            Direction from the right-hand rule:
+            thumb = current, curled fingers = magnetic field direction
+          </div>
+          <p>
+            This is a qualitative visualization, meant for exploration and presentation. It emphasizes
+            field geometry and relative strength rather than exact SI scaling.
+          </p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("fieldCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const currentSlider = document.getElementById("currentSlider");
+    const densitySlider = document.getElementById("densitySlider");
+    const scaleSlider = document.getElementById("scaleSlider");
+
+    const currentValue = document.getElementById("currentValue");
+    const densityValue = document.getElementById("densityValue");
+    const scaleValue = document.getElementById("scaleValue");
+
+    const outBtn = document.getElementById("outBtn");
+    const intoBtn = document.getElementById("intoBtn");
+    const vectorsBtn = document.getElementById("vectorsBtn");
+    const linesBtn = document.getElementById("linesBtn");
+
+    let currentDirection = 1; // 1 = out of page, -1 = into page
+    let showVectors = true;
+    let showLines = true;
+
+    function resizeCanvasForDisplay() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor((rect.width * 0.75) * dpr);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      draw();
+    }
+
+    function drawArrow(x, y, dx, dy, color) {
+      const len = Math.hypot(dx, dy);
+      if (len < 0.001) return;
+
+      const headLength = 7;
+      const angle = Math.atan2(dy, dx);
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.35;
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + dx, y + dy);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x + dx, y + dy);
+      ctx.lineTo(
+        x + dx - headLength * Math.cos(angle - Math.PI / 6),
+        y + dy - headLength * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        x + dx - headLength * Math.cos(angle + Math.PI / 6),
+        y + dy - headLength * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function fieldAt(px, py, cx, cy, currentStrength, direction) {
+      const dx = px - cx;
+      const dy = py - cy;
+      const r2 = dx * dx + dy * dy;
+      const r = Math.sqrt(r2) + 0.0001;
+
+      if (r < 18) return { bx: 0, by: 0 };
+
+      const magnitude = (2200 * currentStrength) / (r + 12);
+      const tx = direction * (-dy / r);
+      const ty = direction * ( dx / r );
+
+      return {
+        bx: magnitude * tx,
+        by: magnitude * ty
+      };
+    }
+
+    function drawGrid(w, h) {
+      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      ctx.lineWidth = 1;
+
+      const step = 40;
+      for (let x = 0; x <= w; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y <= h; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawWire(cx, cy) {
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,140,105,0.16)";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+      ctx.fillStyle = "#ff8c69";
+      ctx.fill();
+
+      if (currentDirection === 1) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff7f3";
+        ctx.fill();
+      } else {
+        ctx.strokeStyle = "#fff7f3";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx - 4, cy - 4);
+        ctx.lineTo(cx + 4, cy + 4);
+        ctx.moveTo(cx + 4, cy - 4);
+        ctx.lineTo(cx - 4, cy + 4);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawFieldLines(cx, cy, currentStrength, direction, w, h) {
+      const radii = [40, 70, 105, 145, 190, 240];
+      ctx.lineWidth = 1.2;
+
+      radii.forEach((r, index) => {
+        ctx.strokeStyle = `rgba(127,214,255,${0.18 + index * 0.08})`;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const angle = direction === 1 ? -Math.PI / 4 : Math.PI / 4;
+        const ax = cx + r * Math.cos(angle);
+        const ay = cy + r * Math.sin(angle);
+
+        const tangentAngle = angle + direction * Math.PI / 2;
+        const size = 10;
+
+        ctx.fillStyle = "rgba(155,140,255,0.95)";
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(
+          ax - size * Math.cos(tangentAngle - Math.PI / 6),
+          ay - size * Math.sin(tangentAngle - Math.PI / 6)
+        );
+        ctx.lineTo(
+          ax - size * Math.cos(tangentAngle + Math.PI / 6),
+          ay - size * Math.sin(tangentAngle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fill();
+      });
+    }
+
+    function drawVectors(cx, cy, currentStrength, direction, w, h) {
+      const density = parseInt(densitySlider.value, 10);
+      const arrowScale = parseFloat(scaleSlider.value);
+      const spacingX = w / density;
+      const spacingY = h / Math.round(density * 0.75);
+
+      for (let x = spacingX / 2; x < w; x += spacingX) {
+        for (let y = spacingY / 2; y < h; y += spacingY) {
+          const field = fieldAt(x, y, cx, cy, currentStrength, direction);
+          const mag = Math.hypot(field.bx, field.by);
+
+          if (mag < 0.01) continue;
+
+          const capped = Math.min(16, mag * 0.06 * arrowScale);
+          const angle = Math.atan2(field.by, field.bx);
+
+          const dx = capped * Math.cos(angle);
+          const dy = capped * Math.sin(angle);
+
+          const alpha = Math.min(0.95, 0.25 + mag / 90);
+          drawArrow(x, y, dx, dy, `rgba(127,214,255,${alpha})`);
+        }
+      }
+    }
+
+    function drawLegend(w) {
+      ctx.fillStyle = "rgba(10, 14, 28, 0.68)";
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(18, 18, 250, 92, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#eef3ff";
+      ctx.font = "600 14px Inter, Arial, sans-serif";
+      ctx.fillText("Magnetic Field Around a Straight Wire", 32, 42);
+
+      ctx.fillStyle = "#a9b7d9";
+      ctx.font = "13px Inter, Arial, sans-serif";
+      ctx.fillText(currentDirection === 1 ? "Current: out of page (•)" : "Current: into page (×)", 32, 68);
+      ctx.fillText("Field strength decreases with distance from the wire", 32, 90);
+    }
+
+    function draw() {
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const currentStrength = parseFloat(currentSlider.value);
+
+      currentValue.textContent = currentStrength.toFixed(1);
+      densityValue.textContent = densitySlider.value;
+      scaleValue.textContent = parseFloat(scaleSlider.value).toFixed(1);
+
+      ctx.clearRect(0, 0, w, h);
+
+      drawGrid(w, h);
+
+      if (showLines) {
+        drawFieldLines(cx, cy, currentStrength, currentDirection, w, h);
+      }
+
+      if (showVectors) {
+        drawVectors(cx, cy, currentStrength, currentDirection, w, h);
+      }
+
+      drawWire(cx, cy);
+      drawLegend(w);
+    }
+
+    currentSlider.addEventListener("input", draw);
+    densitySlider.addEventListener("input", draw);
+    scaleSlider.addEventListener("input", draw);
+
+    outBtn.addEventListener("click", () => {
+      currentDirection = 1;
+      outBtn.classList.add("active");
+      intoBtn.classList.remove("active");
+      draw();
+    });
+
+    intoBtn.addEventListener("click", () => {
+      currentDirection = -1;
+      intoBtn.classList.add("active");
+      outBtn.classList.remove("active");
+      draw();
+    });
+
+    vectorsBtn.addEventListener("click", () => {
+      showVectors = !showVectors;
+      vectorsBtn.classList.toggle("active", showVectors);
+      draw();
+    });
+
+    linesBtn.addEventListener("click", () => {
+      showLines = !showLines;
+      linesBtn.classList.toggle("active", showLines);
+      draw();
+    });
+
+    window.addEventListener("resize", resizeCanvasForDisplay);
+
+    resizeCanvasForDisplay();
+  </script>
+</body>
+</html>
