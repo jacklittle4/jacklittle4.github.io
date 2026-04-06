@@ -11,7 +11,7 @@
 
   <nav class="navbar">
     <ul>
-      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="index.html" class="is-active">Home</a></li>
       <li><a href="fourier.html">Fourier</a></li>
       <li><a href="wave.html">Wave</a></li>
       <li><a href="field.html">Field</a></li>
@@ -68,6 +68,7 @@
       const root = document.documentElement;
       const KEY = 'site-theme';
       const saved = localStorage.getItem(KEY);
+
       if (saved === 'light' || saved === 'dark') {
         root.setAttribute('data-theme', saved);
       }
