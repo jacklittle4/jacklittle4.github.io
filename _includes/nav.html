@@ -1,0 +1,17 @@
+<nav class="navbar">
+  <ul>
+    <li><a href="/" class="{% if page.url == '/' %}is-active{% endif %}">Home</a></li>
+    <li><a href="/fourier/" class="{% if page.url == '/fourier/' %}is-active{% endif %}">Fourier</a></li>
+    <li><a href="/wave/" class="{% if page.url == '/wave/' %}is-active{% endif %}">Wave</a></li>
+    <li><a href="/field/" class="{% if page.url == '/field/' %}is-active{% endif %}">Field</a></li>
+    <li><a href="/research/" class="{% if page.url == '/research/' %}is-active{% endif %}">Research</a></li>
+    <li><a href="/courses/" class="{% if page.url == '/courses/' %}is-active{% endif %}">Courses</a></li>
+    <li><a href="/about/" class="{% if page.url == '/about/' %}is-active{% endif %}">About</a></li>
+    <li><a href="/blackhole_antiparticles/" class="{% if page.url == '/blackhole_antiparticles/' %}is-active{% endif %}">Black Hole</a></li>
+    <li>
+      <button class="btn" onclick="toggleTheme()" aria-label="Toggle theme">
+        🌓 Toggle Theme
+      </button>
+    </li>
+  </ul>
+</nav>
