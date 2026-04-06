@@ -1,0 +1,81 @@
+---
+layout: default
+title: Research
+permalink: /research/
+---
+
+<header>
+  <h1>Research</h1>
+  <p>Projects and questions I’m exploring, with code and write-ups as they mature.</p>
+</header>
+
+<section class="upload-section" style="max-width: 900px;">
+  <h2>Focus</h2>
+  <p style="margin:0 auto 0.75rem; max-width:70ch; color:var(--muted);">
+    I’m building a portfolio of computational physics projects that emphasize
+    clear methods, reproducibility, and meaningful visualizations. Current priorities:
+    an <strong>N-body gravity</strong> simulator (symplectic integrators, energy error),
+    a <strong>2D Ising model</strong> (Metropolis, heat capacity / susceptibility),
+    and a <strong>numerical ODE/PDE</strong> solver playground.
+  </p>
+</section>
+
+<section class="projects" style="padding-top:1rem;">
+
+  <article class="project-card">
+    <h2>N-Body Simulation (Newtonian Gravity)</h2>
+    <p class="muted">Leapfrog / velocity-Verlet, softening, Barnes–Hut (stretch), energy conservation tracking.</p>
+    <p class="muted">Status: In Progress</p>
+  </article>
+
+  <article class="project-card">
+    <h2>Ising Model (2D)</h2>
+    <p class="muted">Metropolis–Hastings; measure ⟨M⟩, χ, C<sub>V</sub> vs. temperature; finite-size effects.</p>
+    <p class="muted">Status: In Progress</p>
+  </article>
+
+  <article class="project-card">
+    <h2>ODE / PDE Solver Playground</h2>
+    <p class="muted">IVP solvers (RK4, adaptive RKF45) and PDE demos (1D heat/wave with explicit/implicit schemes).</p>
+    <p class="muted">Status: In Progress</p>
+  </article>
+
+  <article class="project-card">
+    <h2>Fourier Transform Visualizer</h2>
+    <p class="muted">Windowing &amp; leakage demos with real audio; time↔frequency intuition.</p>
+    <p style="margin-top:.5rem;">
+      <a class="project-link" href="/fourier/">
+        <span class="project-card" style="display:inline-block; padding:.5rem .8rem;">Open Demo</span>
+      </a>
+    </p>
+  </article>
+
+  <article class="project-card">
+    <h2>Wave Interference (2-Source)</h2>
+    <p class="muted">Canvas visualization; plan: add intensity profiles and analytical loci overlays.</p>
+    <p style="margin-top:.5rem;">
+      <a class="project-link" href="/wave/">
+        <span class="project-card" style="display:inline-block; padding:.5rem .8rem;">Open Demo</span>
+      </a>
+    </p>
+  </article>
+
+  <article class="project-card">
+    <h2>Magnetic Field Plotter</h2>
+    <p class="muted">Rewriting with correct Biot–Savart/Ampère forms; verification against analytic cases.</p>
+    <p style="margin-top:.5rem;">
+      <a class="project-link" href="/field/">
+        <span class="project-card" style="display:inline-block; padding:.5rem .8rem;">Open Demo</span>
+      </a>
+    </p>
+  </article>
+</section>
+
+<section class="projects" id="papers" style="padding-top:.5rem;">
+  <article class="project-card">
+    <h2>Project Papers (PDF)</h2>
+    <p class="muted">Mini-papers with abstract, methods, results, and references. Each project links its PDF here.</p>
+    <ul style="list-style:none; padding:0; margin:.5rem 0 0; color:var(--muted);">
+    </ul>
+  </article>
+</section>
