@@ -3,6 +3,10 @@
 <head>
   {% include head.html %}
   <title>{{ page.title }} — Jack Little</title>
+
+  {% if page.plotly %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endif %}
 </head>
 <body>
 
