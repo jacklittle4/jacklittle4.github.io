@@ -2,126 +2,110 @@
 layout: default
 title: About
 permalink: /about/
-description: About Jack Little — Engineering Physics student at Commonwealth University of Pennsylvania.
+description: About Jack Little - Engineering Physics student at Commonwealth University of Pennsylvania.
 ---
 
 <section class="page-hero">
   <div class="wrap">
-    <span class="label">About</span>
-    <h1>Jack <em>Little</em></h1>
-    <p>Engineering Physics student. Computational physicist. Future graduate researcher in cosmology.</p>
+    <div>
+      <div class="hero-kicker">
+        <span class="badge badge--done">About</span>
+        <span class="label">Physics student + builder</span>
+      </div>
+      <h1>Jack Little.</h1>
+      <p>
+        Engineering Physics student, computational simulation builder,
+        and future graduate researcher in cosmology.
+      </p>
+    </div>
+    <aside class="hero-aside">
+      <p>Commonwealth University of Pennsylvania - Bloomsburg, PA.</p>
+    </aside>
   </div>
 </section>
 
-<section>
-  <div class="wrap">
-    <div class="about-grid">
+<section class="section">
+  <div class="wrap about-layout">
+    <div class="flow">
+      <span class="eyebrow">Background</span>
+      <h2>The short version.</h2>
+      <p>
+        I am a third-year Engineering Physics student at Commonwealth University of Pennsylvania,
+        Bloomsburg, with a minor in Mathematics. I am a David J. Harper Scholar and serve as a
+        Supplemental Instruction Leader for upper-division physics courses.
+      </p>
+      <p>
+        My coursework and projects span classical mechanics, electromagnetism, quantum mechanics,
+        numerical methods, general relativity, and cosmology. I like building simulations because
+        code turns a derivation into something testable.
+      </p>
+      <p>
+        This website is both a portfolio and a working notebook: a place where math, physics,
+        and interface design meet in small experiments that can be pushed, broken, improved, and
+        made clearer over time.
+      </p>
 
-      <div>
-        <span class="label">Background</span>
-        <h2 style="margin-bottom:1.5rem">The short version</h2>
-        <p>
-          I'm a third-year Engineering Physics student at Commonwealth University of Pennsylvania, Bloomsburg,
-          with a minor in Mathematics. I'm a David J. Harper Scholar and serve as a Supplemental Instruction Leader
-          for upper-division physics courses.
-        </p>
-        <p>
-          My academic work spans classical mechanics, electromagnetism, quantum mechanics, and increasingly, 
-          general relativity and cosmology. I do hands-on research in planetary science and have independent experience
-          with observational astrophysics data pipelines.
-        </p>
-        <p>
-          Outside the classroom I build interactive physics simulations — not as a hobby exactly, but because I
-          find that writing something from scratch forces a depth of understanding that coursework alone doesn't always provide.
-          Everything on this site is written by hand in vanilla JavaScript.
-        </p>
+      <div class="divider" style="width:100%;margin:2.5rem 0"></div>
 
-        <div class="divider" style="margin:2rem 0;width:100%"></div>
+      <span class="eyebrow">Trajectory</span>
+      <h2>Where I am headed.</h2>
+      <p>
+        I plan to pursue graduate study in theoretical and computational cosmology, with a focus on
+        primordial black holes, their mass spectra, and their potential role as dark matter candidates.
+      </p>
+      <p>
+        Between now and graduate school, I am deepening the math that supports that path: topology,
+        differential geometry, numerical analysis, and the general relativity needed to reason about
+        compact objects and gravitational-wave signatures.
+      </p>
 
-        <span class="label">Trajectory</span>
-        <h2 style="margin-bottom:1.5rem">Where I'm headed</h2>
-        <p>
-          I plan to pursue graduate study in theoretical and computational cosmology, with a particular focus on
-          primordial black holes — their formation during the early universe, mass spectra under different inflationary
-          scenarios, and their potential role as dark matter candidates.
-        </p>
-        <p>
-          The connection between PBH physics and dark matter is one of the most active and genuinely open problems
-          in modern cosmology. Gravitational wave observations from LIGO/Virgo and future detectors like LISA are 
-          rapidly constraining the parameter space. I want to be working on that problem.
-        </p>
-        <p>
-          Between now and graduate school: finishing my undergraduate degree, deepening my mathematical background
-          through topology and differential geometry, and building out this site as a working demonstration of
-          what I can actually do computationally.
-        </p>
+      <div class="button-row">
+        <a href="{{ '/cv/' | relative_url }}" class="btn btn--accent">View CV</a>
+        <a href="{{ '/projects/' | relative_url }}" class="btn">See projects</a>
+        <a href="https://github.com/jacklittle4" target="_blank" rel="noopener" class="btn">GitHub</a>
       </div>
+    </div>
 
-      <div>
-        <!-- Animated orbit visual -->
-        <div class="about-orbit">
-          <svg class="orbit-svg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
-            <!-- Outer ring -->
-            <circle cx="130" cy="130" r="120" fill="none" stroke="rgba(200,184,255,0.1)" stroke-width="1"/>
-            <!-- Mid ring -->
-            <circle cx="130" cy="130" r="85"  fill="none" stroke="rgba(126,232,200,0.08)" stroke-width="1"/>
-            <!-- Inner ring -->
-            <circle cx="130" cy="130" r="50"  fill="none" stroke="rgba(200,184,255,0.07)" stroke-width="1"/>
-            <!-- Core -->
-            <circle cx="130" cy="130" r="10"  fill="#c8b8ff" opacity="0.85"/>
-            <circle cx="130" cy="130" r="18"  fill="rgba(200,184,255,0.1)"/>
-            <!-- Orbiting bodies -->
-            <circle r="4.5" fill="#7ee8c8" opacity="0.9">
-              <animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="14s" repeatCount="indefinite"/>
-              <animate attributeName="cx" values="130" dur="14s" repeatCount="indefinite"/>
-              <set attributeName="cx" to="250"/>
-              <set attributeName="cy" to="130"/>
-            </circle>
-            <circle cx="250" cy="130" r="4.5" fill="#7ee8c8" opacity="0.9">
-              <animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="14s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="130" cy="45" r="3" fill="#f0c87a" opacity="0.85">
-              <animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="9s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="180" cy="130" r="2.5" fill="#c8b8ff" opacity="0.7">
-              <animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="5.5s" repeatCount="indefinite"/>
-            </circle>
-          </svg>
-        </div>
-
-        <div style="margin-top:2rem">
-          <span class="label">Currently</span>
-          <div style="display:flex;flex-direction:column;gap:0.85rem;margin-top:0.75rem">
-            <div style="display:flex;gap:1rem;align-items:baseline">
-              <span style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);min-width:80px">Study</span>
-              <span style="font-size:0.82rem;color:var(--muted)">Engineering Physics, Year 3 — Bloomsburg PA</span>
-            </div>
-            <div style="display:flex;gap:1rem;align-items:baseline">
-              <span style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);min-width:80px">Research</span>
-              <span style="font-size:0.82rem;color:var(--muted)">16 Psyche surface mapping with Dr. Shepard</span>
-            </div>
-            <div style="display:flex;gap:1rem;align-items:baseline">
-              <span style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);min-width:80px">Building</span>
-              <span style="font-size:0.82rem;color:var(--muted)">Black hole geodesic simulator, N-body sim</span>
-            </div>
-            <div style="display:flex;gap:1rem;align-items:baseline">
-              <span style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);min-width:80px">Reading</span>
-              <span style="font-size:0.82rem;color:var(--muted)">Carroll's <em>Spacetime and Geometry</em></span>
-            </div>
-            <div style="display:flex;gap:1rem;align-items:baseline">
-              <span style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);min-width:80px">Goal</span>
-              <span style="font-size:0.82rem;color:var(--muted)">Graduate programme in cosmology, 2027</span>
-            </div>
+    <aside>
+      <div class="orbit-panel" aria-hidden="true">
+        <div class="hero-visual" style="min-height:340px">
+          <div class="metric-grid"></div>
+          <div class="gravity-well" style="width:min(74vw,300px)">
+            <span class="well-ring"></span>
+            <span class="well-ring"></span>
+            <span class="well-ring"></span>
+            <span class="accretion"></span>
+            <span class="photon-ring"></span>
+            <span class="event-horizon"></span>
           </div>
         </div>
-
-        <div style="margin-top:2.5rem;display:flex;gap:0.75rem;flex-wrap:wrap">
-          <a href="/cv/" class="btn">View CV</a>
-          <a href="https://github.com/jacklittle4" target="_blank" rel="noopener" class="btn">GitHub</a>
-          <a href="mailto:jackrlittle4@gmail.com" class="btn btn--accent">Get in touch</a>
-        </div>
       </div>
 
-    </div>
+      <div class="current-panel">
+        <span class="label">Currently</span>
+        <div class="current-list">
+          <div>
+            <span>Study</span>
+            <span>Engineering Physics, year three</span>
+          </div>
+          <div>
+            <span>Research</span>
+            <span>16 Psyche surface mapping</span>
+          </div>
+          <div>
+            <span>Building</span>
+            <span>Black hole, N-body, Fourier, and numerical method labs</span>
+          </div>
+          <div>
+            <span>Reading</span>
+            <span>General relativity and cosmology texts</span>
+          </div>
+          <div>
+            <span>Goal</span>
+            <span>Graduate program in cosmology</span>
+          </div>
+        </div>
+      </div>
+    </aside>
   </div>
 </section>

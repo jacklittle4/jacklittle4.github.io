@@ -1,10 +1,24 @@
-<nav class="nav">
-  <a href="/" class="nav-logo">Jack Little <span>/ physics &amp; computation</span></a>
-  <ul class="nav-links">
-    <li><a href="/" class="{% if page.url == '/' %}is-active{% endif %}">Home</a></li>
-    <li><a href="/projects/" class="{% if page.url contains '/projects' or page.url contains '/sims' %}is-active{% endif %}">Projects</a></li>
-    <li><a href="/research/" class="{% if page.url == '/research/' %}is-active{% endif %}">Research</a></li>
-    <li><a href="/cv/" class="{% if page.url == '/cv/' %}is-active{% endif %}">CV</a></li>
-    <li><a href="/about/" class="{% if page.url == '/about/' %}is-active{% endif %}">About</a></li>
+<nav class="nav" aria-label="Primary navigation">
+  <a href="{{ '/' | relative_url }}" class="nav-logo" aria-label="Jack Little home">
+    <span class="nav-logo-mark" aria-hidden="true"></span>
+    <span>
+      Jack Little
+      <small>physics + computation</small>
+    </span>
+  </a>
+
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span class="sr-only">Menu</span>
+  </button>
+
+  <ul class="nav-links" id="primaryNav">
+    <li><a href="{{ '/' | relative_url }}" class="{% if page.url == '/' %}is-active{% endif %}">Home</a></li>
+    <li><a href="{{ '/projects/' | relative_url }}" class="{% if page.url contains '/projects' or page.url contains '/sims' %}is-active{% endif %}">Projects</a></li>
+    <li><a href="{{ '/research/' | relative_url }}" class="{% if page.url == '/research/' %}is-active{% endif %}">Research</a></li>
+    <li><a href="{{ '/cv/' | relative_url }}" class="{% if page.url == '/cv/' %}is-active{% endif %}">CV</a></li>
+    <li><a href="{{ '/about/' | relative_url }}" class="{% if page.url == '/about/' %}is-active{% endif %}">About</a></li>
   </ul>
 </nav>

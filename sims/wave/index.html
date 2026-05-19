@@ -2,18 +2,46 @@
 layout: default
 title: Wave Interference Simulator
 permalink: /sims/wave/
+description: Preview page for a point-source wave interference simulator.
 ---
+
 <section class="page-hero">
   <div class="wrap">
-    <span class="badge badge--wip">In progress</span>
-    <span class="label" style="margin-top:0.75rem">Wave mechanics</span>
-    <h1>Wave Interference <em>Simulator</em></h1>
-    <p>Real-time superposition of waves from configurable point sources. Constructive and destructive interference visualised across a 2D field.</p>
+    <div>
+      <div class="hero-kicker">
+        <span class="badge badge--wip">Preview</span>
+        <span class="label">Wave mechanics</span>
+      </div>
+      <h1>Wave Interference Simulator.</h1>
+      <p>
+        A visual shell for point-source superposition, constructive interference,
+        and destructive interference. This page now matches the finished simulation design.
+      </p>
+    </div>
+    <aside class="hero-aside">
+      <p>Next build target: interactive sources and wavelength controls.</p>
+    </aside>
   </div>
 </section>
-<section><div class="wrap--narrow">
-  <div style="border:1px solid var(--rim);background:var(--deep);padding:3rem;text-align:center;border-radius:2px">
-    <p style="font-size:0.82rem;color:var(--muted)">This simulation is currently under development. Check back soon.</p>
-    <a href="/projects/" class="btn" style="margin-top:1.5rem">← All projects</a>
+
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="grid-2">
+      <div class="card">
+        <span class="label">Model plan</span>
+        <h3>Superposition field</h3>
+        <p>
+          The finished version will calculate the sum of multiple circular waves across a 2D field,
+          with source phase, wavelength, amplitude, and damping controls.
+        </p>
+        <div class="button-row">
+          <a href="{{ '/projects/' | relative_url }}" class="btn">Back to projects</a>
+          <a href="{{ '/sims/numerical/' | relative_url }}" class="btn btn--accent">Numerical methods</a>
+        </div>
+      </div>
+      <div class="project-visual" style="min-height:320px">
+        <span class="mini-wave"><span></span><span></span></span>
+      </div>
+    </div>
   </div>
-</div></section>
+</section>

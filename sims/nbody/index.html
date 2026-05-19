@@ -2,18 +2,442 @@
 layout: default
 title: N-Body Simulation
 permalink: /sims/nbody/
+description: Interactive gravitational N-body simulation with presets, trails, and conservation readouts.
 ---
+
 <section class="page-hero">
   <div class="wrap">
-    <span class="badge badge--planned">Planned</span>
-    <span class="label" style="margin-top:0.75rem">Gravitational dynamics</span>
-    <h1>N-Body <em>Simulation</em></h1>
-    <p>Gravitational many-body problem. Adaptive timestep Runge-Kutta integration with optional Barnes-Hut tree for large N.</p>
+    <div>
+      <div class="hero-kicker">
+        <span class="badge badge--done">New</span>
+        <span class="label">Gravitational dynamics</span>
+      </div>
+      <h1>N-Body Simulation.</h1>
+      <p>
+        Explore many-body gravitation with stable presets, direct pairwise forces,
+        adjustable softening, trails, and energy monitoring.
+      </p>
+    </div>
+    <aside class="hero-aside">
+      <p>Velocity Verlet integrator with softened Newtonian gravity.</p>
+    </aside>
   </div>
 </section>
-<section><div class="wrap--narrow">
-  <div style="border:1px solid var(--rim);background:var(--deep);padding:3rem;text-align:center;border-radius:2px">
-    <p style="font-size:0.82rem;color:var(--muted)">This simulation is planned and will be built next.</p>
-    <a href="/projects/" class="btn" style="margin-top:1.5rem">← All projects</a>
+
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="sim-shell">
+      <div class="sim-stage">
+        <canvas id="nbodyCanvas" class="sim-canvas"></canvas>
+        <div class="sim-overlay">
+          <div class="button-row" style="margin:0">
+            <button class="btn btn--small" id="nbodyPause" type="button">Pause</button>
+            <button class="btn btn--small" id="nbodyReset" type="button">Reset</button>
+            <button class="btn btn--small" id="nbodyAdd" type="button">Add body</button>
+          </div>
+          <span class="sim-readout" id="nbodyStatus">Running</span>
+        </div>
+      </div>
+
+      <aside class="sim-controls" aria-label="N-body controls">
+        <div class="control-group">
+          <label for="nbodyPreset">Preset</label>
+          <select id="nbodyPreset">
+            <option value="solar" selected>Compact solar system</option>
+            <option value="binary">Binary star</option>
+            <option value="figure8">Three-body figure eight</option>
+            <option value="cluster">Star cluster</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="nbodyCount">Bodies <span id="nbodyCountVal">22</span></label>
+          <input type="range" id="nbodyCount" min="3" max="80" step="1" value="22">
+        </div>
+
+        <div class="control-group">
+          <label for="nbodyG">Gravity G <span id="nbodyGVal">0.85</span></label>
+          <input type="range" id="nbodyG" min="0.1" max="2.0" step="0.05" value="0.85">
+        </div>
+
+        <div class="control-group">
+          <label for="nbodyDt">Time step <span id="nbodyDtVal">0.08</span></label>
+          <input type="range" id="nbodyDt" min="0.01" max="0.20" step="0.01" value="0.08">
+        </div>
+
+        <div class="control-group">
+          <label for="nbodySoft">Softening <span id="nbodySoftVal">0.55</span></label>
+          <input type="range" id="nbodySoft" min="0.05" max="2.0" step="0.05" value="0.55">
+        </div>
+
+        <div class="control-group">
+          <label for="nbodyTrail">Trail length <span id="nbodyTrailVal">140</span></label>
+          <input type="range" id="nbodyTrail" min="20" max="320" step="10" value="140">
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="sim-stat-val" id="nbodyBodies">22</div>
+            <div class="sim-stat-label">Bodies</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="nbodyEnergy">--</div>
+            <div class="sim-stat-label">Total energy</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="nbodyDrift">--</div>
+            <div class="sim-stat-label">Energy drift</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="nbodyTime">0.0</div>
+            <div class="sim-stat-label">Sim time</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <p class="hint" style="margin-top:1rem">Click the canvas to add a body with a tangential orbital velocity.</p>
   </div>
-</div></section>
+</section>
+
+<section class="section band">
+  <div class="wrap">
+    <div class="grid-2">
+      <article class="card">
+        <span class="label">Integrator</span>
+        <h3>Velocity Verlet</h3>
+        <p>
+          The simulation uses direct O(N^2) pairwise acceleration and a velocity Verlet step,
+          which is well suited for orbital systems because it preserves energy better than plain Euler.
+        </p>
+      </article>
+      <article class="card">
+        <span class="label">Softening</span>
+        <h3>Close encounters</h3>
+        <p>
+          The softening slider prevents infinite acceleration when two bodies pass very close together.
+          Lower values are sharper but less stable; higher values smooth the gravitational field.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const canvas = document.getElementById('nbodyCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  const ui = {
+    preset: document.getElementById('nbodyPreset'),
+    count: document.getElementById('nbodyCount'),
+    G: document.getElementById('nbodyG'),
+    dt: document.getElementById('nbodyDt'),
+    soft: document.getElementById('nbodySoft'),
+    trail: document.getElementById('nbodyTrail'),
+    countVal: document.getElementById('nbodyCountVal'),
+    GVal: document.getElementById('nbodyGVal'),
+    dtVal: document.getElementById('nbodyDtVal'),
+    softVal: document.getElementById('nbodySoftVal'),
+    trailVal: document.getElementById('nbodyTrailVal'),
+    pause: document.getElementById('nbodyPause'),
+    reset: document.getElementById('nbodyReset'),
+    add: document.getElementById('nbodyAdd'),
+    status: document.getElementById('nbodyStatus'),
+    bodies: document.getElementById('nbodyBodies'),
+    energy: document.getElementById('nbodyEnergy'),
+    drift: document.getElementById('nbodyDrift'),
+    time: document.getElementById('nbodyTime')
+  };
+
+  let width = 0;
+  let height = 0;
+  let cx = 0;
+  let cy = 0;
+  let zoom = 1;
+  let bodies = [];
+  let running = true;
+  let time = 0;
+  let initialEnergy = 0;
+  let addMode = false;
+
+  const palette = ['#6ee7f0', '#8cf5bd', '#f4bd64', '#ff7d90', '#b8a4ff', '#eef4f2'];
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    width = rect.width;
+    height = Math.max(rect.height, 620);
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx = width / 2;
+    cy = height / 2;
+    zoom = Math.min(width, height) / 72;
+  }
+
+  function seeded(i, salt) {
+    const x = Math.sin(i * 87.3 + salt * 211.9) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function body(x, y, vx, vy, mass, color) {
+    return {
+      x, y, vx, vy, mass,
+      ax: 0, ay: 0,
+      color,
+      trail: [],
+      radius: Math.max(2.2, Math.min(10, Math.pow(mass, 0.33) * 1.2))
+    };
+  }
+
+  function params() {
+    return {
+      G: parseFloat(ui.G.value),
+      dt: parseFloat(ui.dt.value),
+      soft: parseFloat(ui.soft.value),
+      trail: parseInt(ui.trail.value, 10)
+    };
+  }
+
+  function updateLabels() {
+    ui.countVal.textContent = ui.count.value;
+    ui.GVal.textContent = parseFloat(ui.G.value).toFixed(2);
+    ui.dtVal.textContent = parseFloat(ui.dt.value).toFixed(2);
+    ui.softVal.textContent = parseFloat(ui.soft.value).toFixed(2);
+    ui.trailVal.textContent = ui.trail.value;
+    ui.bodies.textContent = bodies.length;
+  }
+
+  function makeSolar() {
+    const G = parseFloat(ui.G.value);
+    const result = [body(0, 0, 0, 0, 900, '#f4bd64')];
+    const distances = [9, 14, 19, 25, 32];
+    distances.forEach((r, i) => {
+      const speed = Math.sqrt(G * result[0].mass / r);
+      const angle = i * 1.25;
+      result.push(body(Math.cos(angle) * r, Math.sin(angle) * r, -Math.sin(angle) * speed, Math.cos(angle) * speed, 2 + i * 0.8, palette[i % palette.length]));
+    });
+    for (let i = 0; i < 16; i++) {
+      const r = 34 + seeded(i, 1) * 14;
+      const a = seeded(i, 2) * Math.PI * 2;
+      const speed = Math.sqrt(G * result[0].mass / r) * (0.92 + seeded(i, 3) * 0.12);
+      result.push(body(Math.cos(a) * r, Math.sin(a) * r, -Math.sin(a) * speed, Math.cos(a) * speed, 0.25 + seeded(i, 4), palette[(i + 2) % palette.length]));
+    }
+    return result;
+  }
+
+  function makeBinary() {
+    const m = 260;
+    const r = 10;
+    const v = 2.25;
+    return [
+      body(-r, 0, 0, -v, m, '#6ee7f0'),
+      body(r, 0, 0, v, m, '#f4bd64'),
+      body(0, 24, -4.0, 0, 4, '#8cf5bd'),
+      body(0, -30, 3.5, 0, 3, '#ff7d90')
+    ];
+  }
+
+  function makeFigure8() {
+    const s = 15;
+    const v = 3.2;
+    return [
+      body(-0.97000436 * s, 0.24308753 * s, 0.466203685 * v, 0.43236573 * v, 60, '#6ee7f0'),
+      body(0.97000436 * s, -0.24308753 * s, 0.466203685 * v, 0.43236573 * v, 60, '#f4bd64'),
+      body(0, 0, -0.93240737 * v, -0.86473146 * v, 60, '#8cf5bd')
+    ];
+  }
+
+  function makeCluster() {
+    const count = parseInt(ui.count.value, 10);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const r = Math.sqrt(seeded(i, 1)) * 28;
+      const a = seeded(i, 2) * Math.PI * 2;
+      const mass = 1 + seeded(i, 3) * 8;
+      const spin = 0.55 + seeded(i, 4) * 1.2;
+      result.push(body(
+        Math.cos(a) * r,
+        Math.sin(a) * r,
+        -Math.sin(a) * spin,
+        Math.cos(a) * spin,
+        mass,
+        palette[i % palette.length]
+      ));
+    }
+    return result;
+  }
+
+  function reset() {
+    const preset = ui.preset.value;
+    if (preset === 'solar') bodies = makeSolar();
+    if (preset === 'binary') bodies = makeBinary();
+    if (preset === 'figure8') bodies = makeFigure8();
+    if (preset === 'cluster') bodies = makeCluster();
+    time = 0;
+    computeAccelerations();
+    initialEnergy = totalEnergy();
+    updateLabels();
+  }
+
+  function computeAccelerations() {
+    const { G, soft } = params();
+    bodies.forEach((b) => { b.ax = 0; b.ay = 0; });
+    for (let i = 0; i < bodies.length; i++) {
+      for (let j = i + 1; j < bodies.length; j++) {
+        const a = bodies[i];
+        const b = bodies[j];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const r2 = dx * dx + dy * dy + soft * soft;
+        const inv = 1 / Math.pow(r2, 1.5);
+        const fx = G * dx * inv;
+        const fy = G * dy * inv;
+        a.ax += fx * b.mass;
+        a.ay += fy * b.mass;
+        b.ax -= fx * a.mass;
+        b.ay -= fy * a.mass;
+      }
+    }
+  }
+
+  function step() {
+    const { dt, trail } = params();
+    bodies.forEach((b) => {
+      b.vx += 0.5 * b.ax * dt;
+      b.vy += 0.5 * b.ay * dt;
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+    });
+    computeAccelerations();
+    bodies.forEach((b) => {
+      b.vx += 0.5 * b.ax * dt;
+      b.vy += 0.5 * b.ay * dt;
+      b.trail.push([b.x, b.y]);
+      if (b.trail.length > trail) b.trail.shift();
+    });
+    time += dt;
+  }
+
+  function totalEnergy() {
+    const { G, soft } = params();
+    let kinetic = 0;
+    let potential = 0;
+    bodies.forEach((b) => {
+      kinetic += 0.5 * b.mass * (b.vx * b.vx + b.vy * b.vy);
+    });
+    for (let i = 0; i < bodies.length; i++) {
+      for (let j = i + 1; j < bodies.length; j++) {
+        const dx = bodies[j].x - bodies[i].x;
+        const dy = bodies[j].y - bodies[i].y;
+        const r = Math.sqrt(dx * dx + dy * dy + soft * soft);
+        potential -= G * bodies[i].mass * bodies[j].mass / r;
+      }
+    }
+    return kinetic + potential;
+  }
+
+  function screen(b) {
+    return [cx + b.x * zoom, cy - b.y * zoom];
+  }
+
+  function draw() {
+    ctx.fillStyle = '#07090d';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = 'rgba(110,231,240,0.06)';
+    ctx.lineWidth = 1;
+    const grid = 10 * zoom;
+    for (let x = cx % grid; x < width; x += grid) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    }
+    for (let y = cy % grid; y < height; y += grid) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    }
+
+    bodies.forEach((b) => {
+      if (b.trail.length > 1) {
+        ctx.beginPath();
+        b.trail.forEach((p, i) => {
+          const x = cx + p[0] * zoom;
+          const y = cy - p[1] * zoom;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = b.color + '88';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+    });
+
+    bodies.forEach((b) => {
+      const [x, y] = screen(b);
+      ctx.beginPath();
+      ctx.arc(x, y, b.radius, 0, Math.PI * 2);
+      ctx.fillStyle = b.color;
+      ctx.shadowColor = b.color;
+      ctx.shadowBlur = 12;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+
+    const e = totalEnergy();
+    const drift = initialEnergy ? ((e - initialEnergy) / Math.abs(initialEnergy)) * 100 : 0;
+    ui.energy.textContent = Number.isFinite(e) ? e.toFixed(1) : '--';
+    ui.drift.textContent = Number.isFinite(drift) ? drift.toFixed(2) + '%' : '--';
+    ui.time.textContent = time.toFixed(1);
+    ui.bodies.textContent = bodies.length;
+  }
+
+  function loop() {
+    if (running) {
+      const iterations = bodies.length > 45 ? 1 : 2;
+      for (let i = 0; i < iterations; i++) step();
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function addBodyAt(x, y) {
+    const wx = (x - cx) / zoom;
+    const wy = (cy - y) / zoom;
+    const r = Math.max(4, Math.hypot(wx, wy));
+    const speed = Math.sqrt(parseFloat(ui.G.value) * 500 / r) * 0.55;
+    const vx = -wy / r * speed;
+    const vy = wx / r * speed;
+    bodies.push(body(wx, wy, vx, vy, 3 + (bodies.length % 5), palette[bodies.length % palette.length]));
+    computeAccelerations();
+    ui.status.textContent = 'Body added';
+  }
+
+  [ui.count, ui.G, ui.dt, ui.soft, ui.trail].forEach((input) => input.addEventListener('input', updateLabels));
+  ui.count.addEventListener('change', () => { if (ui.preset.value === 'cluster') reset(); });
+  ui.preset.addEventListener('change', reset);
+  ui.reset.addEventListener('click', reset);
+  ui.pause.addEventListener('click', () => {
+    running = !running;
+    ui.pause.textContent = running ? 'Pause' : 'Run';
+    ui.pause.classList.toggle('is-active', !running);
+    ui.status.textContent = running ? 'Running' : 'Paused';
+  });
+  ui.add.addEventListener('click', () => {
+    addMode = !addMode;
+    ui.add.classList.toggle('is-active', addMode);
+    ui.status.textContent = addMode ? 'Click to add' : 'Running';
+  });
+  canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    addBodyAt(event.clientX - rect.left, event.clientY - rect.top);
+    addMode = false;
+    ui.add.classList.remove('is-active');
+  });
+  window.addEventListener('resize', resize);
+
+  resize();
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>

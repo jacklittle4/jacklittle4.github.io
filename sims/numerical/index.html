@@ -2,18 +2,409 @@
 layout: default
 title: Numerical Methods Explorer
 permalink: /sims/numerical/
+description: Compare Euler, midpoint, RK4, and exact solutions for first-order ODEs.
 ---
+
 <section class="page-hero">
   <div class="wrap">
-    <span class="badge badge--planned">Planned</span>
-    <span class="label" style="margin-top:0.75rem">Numerical methods</span>
-    <h1>Numerical Methods <em>Explorer</em></h1>
-    <p>Step-through visualisation of ODE integration schemes — Euler, RK2, RK4, Adams-Bashforth — with accuracy and stability comparisons.</p>
+    <div>
+      <div class="hero-kicker">
+        <span class="badge badge--done">New</span>
+        <span class="label">Numerical methods</span>
+      </div>
+      <h1>Numerical Methods Explorer.</h1>
+      <p>
+        Compare Euler, midpoint, RK4, and exact solutions for first-order ODEs.
+        Adjust the step size and watch numerical error separate the methods.
+      </p>
+    </div>
+    <aside class="hero-aside">
+      <p>Step-by-step ODE integration with live error readouts.</p>
+    </aside>
   </div>
 </section>
-<section><div class="wrap--narrow">
-  <div style="border:1px solid var(--rim);background:var(--deep);padding:3rem;text-align:center;border-radius:2px">
-    <p style="font-size:0.82rem;color:var(--muted)">This simulation is planned.</p>
-    <a href="/projects/" class="btn" style="margin-top:1.5rem">← All projects</a>
+
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="sim-shell">
+      <div class="sim-stage">
+        <canvas id="methodsCanvas" class="sim-canvas"></canvas>
+        <div class="sim-overlay">
+          <div class="button-row" style="margin:0">
+            <button class="btn btn--small" id="methodPlay" type="button">Pause</button>
+            <button class="btn btn--small" id="methodStep" type="button">Step</button>
+            <button class="btn btn--small" id="methodReset" type="button">Reset</button>
+          </div>
+          <span class="sim-readout" id="methodStatus">Integrating</span>
+        </div>
+      </div>
+
+      <aside class="sim-controls" aria-label="Numerical method controls">
+        <div class="control-group">
+          <label for="methodEquation">Equation</label>
+          <select id="methodEquation">
+            <option value="exp" selected>Exponential: y' = a y</option>
+            <option value="logistic">Logistic: y' = r y(1-y/K)</option>
+            <option value="cooling">Cooling: y' = -k(y-A)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="methodParam">Parameter <span id="methodParamVal">0.70</span></label>
+          <input type="range" id="methodParam" min="0.1" max="1.6" step="0.05" value="0.7">
+        </div>
+
+        <div class="control-group">
+          <label for="methodStepSize">Step size h <span id="methodStepVal">0.25</span></label>
+          <input type="range" id="methodStepSize" min="0.05" max="0.8" step="0.05" value="0.25">
+        </div>
+
+        <div class="control-group">
+          <label for="methodDomain">Domain xmax <span id="methodDomainVal">6.0</span></label>
+          <input type="range" id="methodDomain" min="2" max="10" step="0.5" value="6">
+        </div>
+
+        <div class="equation-card" id="methodEquationText">y' = a y, y(0) = 1</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="sim-stat-val" id="methodEulerErr">--</div>
+            <div class="sim-stat-label">Euler error</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="methodMidErr">--</div>
+            <div class="sim-stat-label">Midpoint error</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="methodRKErr">--</div>
+            <div class="sim-stat-label">RK4 error</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="methodStepsOut">24</div>
+            <div class="sim-stat-label">Steps</div>
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
-</div></section>
+</section>
+
+<section class="section band">
+  <div class="wrap">
+    <div class="grid-3">
+      <article class="card">
+        <span class="label">Euler</span>
+        <h3>First-order estimate</h3>
+        <p>Euler follows the local slope forward. It is intuitive and fast, but error grows quickly when the curve bends.</p>
+      </article>
+      <article class="card">
+        <span class="label">Midpoint</span>
+        <h3>Second-order correction</h3>
+        <p>The midpoint method samples a slope halfway through the step, improving curvature response with little extra work.</p>
+      </article>
+      <article class="card">
+        <span class="label">RK4</span>
+        <h3>Fourth-order workhorse</h3>
+        <p>RK4 blends four slope estimates per step, often giving strong accuracy without tiny step sizes.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const canvas = document.getElementById('methodsCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  const ui = {
+    equation: document.getElementById('methodEquation'),
+    param: document.getElementById('methodParam'),
+    h: document.getElementById('methodStepSize'),
+    xmax: document.getElementById('methodDomain'),
+    paramVal: document.getElementById('methodParamVal'),
+    hVal: document.getElementById('methodStepVal'),
+    xmaxVal: document.getElementById('methodDomainVal'),
+    equationText: document.getElementById('methodEquationText'),
+    play: document.getElementById('methodPlay'),
+    step: document.getElementById('methodStep'),
+    reset: document.getElementById('methodReset'),
+    status: document.getElementById('methodStatus'),
+    eulerErr: document.getElementById('methodEulerErr'),
+    midErr: document.getElementById('methodMidErr'),
+    rkErr: document.getElementById('methodRKErr'),
+    stepsOut: document.getElementById('methodStepsOut')
+  };
+
+  let width = 0;
+  let height = 0;
+  let playing = true;
+  let progress = 0;
+  let curves = null;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    width = rect.width;
+    height = Math.max(rect.height, 620);
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function params() {
+    return {
+      type: ui.equation.value,
+      a: parseFloat(ui.param.value),
+      h: parseFloat(ui.h.value),
+      xmax: parseFloat(ui.xmax.value)
+    };
+  }
+
+  function f(x, y, p) {
+    if (p.type === 'exp') return p.a * y;
+    if (p.type === 'logistic') return p.a * y * (1 - y / 8);
+    return -p.a * (y - 1.5);
+  }
+
+  function y0(p) {
+    if (p.type === 'logistic') return 0.7;
+    if (p.type === 'cooling') return 7;
+    return 1;
+  }
+
+  function exact(x, p) {
+    if (p.type === 'exp') return y0(p) * Math.exp(p.a * x);
+    if (p.type === 'logistic') {
+      const K = 8;
+      const initial = y0(p);
+      return K / (1 + ((K - initial) / initial) * Math.exp(-p.a * x));
+    }
+    return 1.5 + (y0(p) - 1.5) * Math.exp(-p.a * x);
+  }
+
+  function eulerStep(x, y, h, p) {
+    return y + h * f(x, y, p);
+  }
+
+  function midpointStep(x, y, h, p) {
+    const k1 = f(x, y, p);
+    return y + h * f(x + h / 2, y + h * k1 / 2, p);
+  }
+
+  function rk4Step(x, y, h, p) {
+    const k1 = f(x, y, p);
+    const k2 = f(x + h / 2, y + h * k1 / 2, p);
+    const k3 = f(x + h / 2, y + h * k2 / 2, p);
+    const k4 = f(x + h, y + h * k3, p);
+    return y + h * (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+  }
+
+  function solve(method, p) {
+    const pts = [[0, y0(p)]];
+    let x = 0;
+    let y = y0(p);
+    while (x < p.xmax - 1e-9) {
+      const h = Math.min(p.h, p.xmax - x);
+      y = method(x, y, h, p);
+      x += h;
+      pts.push([x, y]);
+    }
+    return pts;
+  }
+
+  function makeCurves() {
+    const p = params();
+    const exactPts = [];
+    const samples = 420;
+    for (let i = 0; i <= samples; i++) {
+      const x = p.xmax * i / samples;
+      exactPts.push([x, exact(x, p)]);
+    }
+    const euler = solve(eulerStep, p);
+    const midpoint = solve(midpointStep, p);
+    const rk4 = solve(rk4Step, p);
+    curves = { p, exactPts, euler, midpoint, rk4 };
+    progress = 0;
+    updateStats();
+  }
+
+  function updateLabels() {
+    const p = params();
+    ui.paramVal.textContent = p.a.toFixed(2);
+    ui.hVal.textContent = p.h.toFixed(2);
+    ui.xmaxVal.textContent = p.xmax.toFixed(1);
+    if (p.type === 'exp') ui.equationText.textContent = "y' = a y, y(0) = 1";
+    if (p.type === 'logistic') ui.equationText.textContent = "y' = r y(1-y/K), K = 8, y(0) = 0.7";
+    if (p.type === 'cooling') ui.equationText.textContent = "y' = -k(y-A), A = 1.5, y(0) = 7";
+  }
+
+  function updateStats() {
+    if (!curves) return;
+    const p = curves.p;
+    const exactEnd = exact(p.xmax, p);
+    const last = (arr) => arr[arr.length - 1][1];
+    ui.eulerErr.textContent = Math.abs(last(curves.euler) - exactEnd).toExponential(2);
+    ui.midErr.textContent = Math.abs(last(curves.midpoint) - exactEnd).toExponential(2);
+    ui.rkErr.textContent = Math.abs(last(curves.rk4) - exactEnd).toExponential(2);
+    ui.stepsOut.textContent = curves.euler.length - 1;
+  }
+
+  function bounds() {
+    const all = [...curves.exactPts, ...curves.euler, ...curves.midpoint, ...curves.rk4];
+    let minY = Math.min(...all.map((p) => p[1]));
+    let maxY = Math.max(...all.map((p) => p[1]));
+    if (Math.abs(maxY - minY) < 0.001) {
+      minY -= 1;
+      maxY += 1;
+    }
+    const pad = (maxY - minY) * 0.12;
+    return { minY: minY - pad, maxY: maxY + pad };
+  }
+
+  function drawCurve(points, color, widthLine, limitX, dashed) {
+    ctx.save();
+    if (dashed) ctx.setLineDash([6, 7]);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = widthLine;
+    ctx.beginPath();
+    let started = false;
+    points.forEach((pt) => {
+      if (pt[0] > limitX) return;
+      const [x, y] = mapPoint(pt[0], pt[1]);
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  let currentBounds = { minY: 0, maxY: 1 };
+  function mapPoint(x, y) {
+    const left = 58;
+    const right = width - 24;
+    const top = 28;
+    const bottom = height - 48;
+    const px = left + (x / curves.p.xmax) * (right - left);
+    const py = bottom - ((y - currentBounds.minY) / (currentBounds.maxY - currentBounds.minY)) * (bottom - top);
+    return [px, py];
+  }
+
+  function drawAxes() {
+    const left = 58;
+    const right = width - 24;
+    const top = 28;
+    const bottom = height - 48;
+    ctx.strokeStyle = 'rgba(110,231,240,0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(left, top);
+    ctx.lineTo(left, bottom);
+    ctx.lineTo(right, bottom);
+    ctx.stroke();
+
+    ctx.font = '700 11px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(164,177,178,0.9)';
+    for (let i = 0; i <= 5; i++) {
+      const x = left + (i / 5) * (right - left);
+      const xv = curves.p.xmax * i / 5;
+      ctx.fillText(xv.toFixed(1), x - 8, bottom + 20);
+      ctx.beginPath();
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.stroke();
+    }
+    for (let i = 0; i <= 5; i++) {
+      const y = bottom - (i / 5) * (bottom - top);
+      const yv = currentBounds.minY + (i / 5) * (currentBounds.maxY - currentBounds.minY);
+      ctx.fillText(yv.toFixed(1), 12, y + 4);
+      ctx.beginPath();
+      ctx.moveTo(left, y);
+      ctx.lineTo(right, y);
+      ctx.stroke();
+    }
+  }
+
+  function drawLegend() {
+    const items = [
+      ['Exact', '#eef4f2'],
+      ['Euler', '#ff7d90'],
+      ['Midpoint', '#f4bd64'],
+      ['RK4', '#8cf5bd']
+    ];
+    let x = 68;
+    items.forEach((item) => {
+      ctx.fillStyle = item[1];
+      ctx.fillRect(x, 18, 18, 3);
+      ctx.fillStyle = 'rgba(238,244,242,0.78)';
+      ctx.font = '700 11px JetBrains Mono, monospace';
+      ctx.fillText(item[0], x + 26, 23);
+      x += 110;
+    });
+  }
+
+  function draw() {
+    if (!curves) return;
+    currentBounds = bounds();
+    ctx.fillStyle = '#07090d';
+    ctx.fillRect(0, 0, width, height);
+    drawAxes();
+    const limit = Math.min(curves.p.xmax, progress);
+    drawCurve(curves.exactPts, 'rgba(238,244,242,0.9)', 2, limit, true);
+    drawCurve(curves.euler, '#ff7d90', 2.2, limit, false);
+    drawCurve(curves.midpoint, '#f4bd64', 2.2, limit, false);
+    drawCurve(curves.rk4, '#8cf5bd', 2.2, limit, false);
+    drawLegend();
+  }
+
+  function loop() {
+    if (playing && curves) {
+      progress += curves.p.xmax / 220;
+      if (progress >= curves.p.xmax) {
+        progress = curves.p.xmax;
+        playing = false;
+        ui.play.textContent = 'Run';
+        ui.status.textContent = 'Complete';
+      }
+      draw();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function recompute() {
+    updateLabels();
+    makeCurves();
+    playing = true;
+    ui.play.textContent = 'Pause';
+    ui.status.textContent = 'Integrating';
+    draw();
+  }
+
+  [ui.equation, ui.param, ui.h, ui.xmax].forEach((input) => input.addEventListener('input', recompute));
+  ui.play.addEventListener('click', () => {
+    playing = !playing;
+    ui.play.textContent = playing ? 'Pause' : 'Run';
+    ui.status.textContent = playing ? 'Integrating' : 'Paused';
+  });
+  ui.step.addEventListener('click', () => {
+    if (!curves) return;
+    playing = false;
+    progress = Math.min(curves.p.xmax, progress + curves.p.h);
+    ui.play.textContent = 'Run';
+    ui.status.textContent = 'Stepped';
+    draw();
+  });
+  ui.reset.addEventListener('click', recompute);
+  window.addEventListener('resize', resize);
+
+  resize();
+  recompute();
+  requestAnimationFrame(loop);
+})();
+</script>

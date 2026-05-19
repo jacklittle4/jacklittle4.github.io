@@ -2,18 +2,50 @@
 layout: default
 title: Magnetic Field Explorer
 permalink: /sims/field/
+description: Preview page for a Biot-Savart magnetic field visualization.
 ---
+
 <section class="page-hero">
   <div class="wrap">
-    <span class="badge badge--wip">In progress</span>
-    <span class="label" style="margin-top:0.75rem">Electromagnetism</span>
-    <h1>Magnetic Field <em>Explorer</em></h1>
-    <p>Vector field visualisation around current-carrying conductors using the Biot-Savart law.</p>
+    <div>
+      <div class="hero-kicker">
+        <span class="badge badge--wip">Preview</span>
+        <span class="label">Electromagnetism</span>
+      </div>
+      <h1>Magnetic Field Explorer.</h1>
+      <p>
+        A visual shell for vector fields around current-carrying conductors using the Biot-Savart law.
+        The page now shares the same structure as the finished labs.
+      </p>
+    </div>
+    <aside class="hero-aside">
+      <p>Next build target: draggable conductors and field-line tracing.</p>
+    </aside>
   </div>
 </section>
-<section><div class="wrap--narrow">
-  <div style="border:1px solid var(--rim);background:var(--deep);padding:3rem;text-align:center;border-radius:2px">
-    <p style="font-size:0.82rem;color:var(--muted)">This simulation is currently under development. Check back soon.</p>
-    <a href="/projects/" class="btn" style="margin-top:1.5rem">← All projects</a>
+
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="grid-2">
+      <div class="card">
+        <span class="label">Model plan</span>
+        <h3>Biot-Savart vectors</h3>
+        <p>
+          The finished version will let users place wires, reverse current direction,
+          and inspect the resulting magnetic field magnitude and direction.
+        </p>
+        <div class="button-row">
+          <a href="{{ '/projects/' | relative_url }}" class="btn">Back to projects</a>
+          <a href="{{ '/sims/nbody/' | relative_url }}" class="btn btn--accent">N-body sim</a>
+        </div>
+      </div>
+      <div class="project-visual" style="min-height:320px">
+        <span class="mini-field">
+          <span style="--x:0;--y:0;--r:20"></span><span style="--x:1;--y:0;--r:50"></span><span style="--x:2;--y:0;--r:80"></span><span style="--x:3;--y:0;--r:110"></span>
+          <span style="--x:0;--y:1;--r:-20"></span><span style="--x:1;--y:1;--r:10"></span><span style="--x:2;--y:1;--r:160"></span><span style="--x:3;--y:1;--r:205"></span>
+          <span style="--x:0;--y:2;--r:-55"></span><span style="--x:1;--y:2;--r:-25"></span><span style="--x:2;--y:2;--r:210"></span><span style="--x:3;--y:2;--r:250"></span>
+        </span>
+      </div>
+    </div>
   </div>
-</div></section>
+</section>

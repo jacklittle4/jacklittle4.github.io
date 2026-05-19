@@ -2,526 +2,555 @@
 layout: default
 title: Black Hole Geodesic Simulator
 permalink: /sims/blackhole/
-description: Visualise geodesic paths of photons and massive particles in Schwarzschild spacetime using 4th-order Runge-Kutta integration.
+description: Visualize geodesic paths of photons and massive particles in Schwarzschild spacetime using RK4 integration.
 ---
 
 <section class="page-hero">
   <div class="wrap">
-    <span class="badge badge--wip">In progress</span>
-    <span class="label" style="margin-top:0.75rem">General relativity</span>
-    <h1>Black Hole Geodesic <em>Simulator</em></h1>
-    <p>
-      Numerical integration of the geodesic equations in Schwarzschild spacetime.
-      Traces paths of photons and massive particles through curved spacetime around a non-rotating black hole.
-      Integration uses a 4th-order Runge-Kutta scheme in geometric units (G = c = 1).
-    </p>
+    <div>
+      <div class="hero-kicker">
+        <span class="badge badge--done">Updated</span>
+        <span class="label">General relativity</span>
+      </div>
+      <h1>Black Hole Geodesic Simulator.</h1>
+      <p>
+        Launch photons and massive particles around a Schwarzschild black hole.
+        The canvas shows the event horizon, photon sphere, ISCO, accretion disk, and integrated trajectories.
+      </p>
+    </div>
+    <aside class="hero-aside">
+      <p>Geometric units: G = c = 1. Integrator: fourth-order Runge-Kutta.</p>
+    </aside>
   </div>
 </section>
 
-<section style="padding-top:0">
+<section class="section section--tight">
   <div class="wrap">
-
-    <!-- Main layout: canvas left, controls right -->
-    <div class="sim-layout" style="margin-bottom:1.5rem">
-
-      <!-- Canvas -->
-      <div class="sim-canvas-wrap" style="min-height:580px;background:#020308">
-        <canvas id="bhCanvas" style="width:100%;height:100%;display:block"></canvas>
-        <div id="bhOverlay" style="position:absolute;bottom:1rem;left:1rem;display:flex;gap:0.75rem;flex-wrap:wrap">
-          <button class="btn" id="clearBtn" style="font-size:0.65rem;padding:0.4rem 0.85rem">Clear paths</button>
-          <button class="btn" id="toggleAccDisk" style="font-size:0.65rem;padding:0.4rem 0.85rem">Accretion disk: on</button>
-          <button class="btn" id="toggleGrid" style="font-size:0.65rem;padding:0.4rem 0.85rem">Grid: on</button>
+    <div class="sim-shell">
+      <div class="sim-stage">
+        <canvas id="blackholeCanvas" class="sim-canvas"></canvas>
+        <div class="sim-overlay">
+          <div class="button-row" style="margin:0">
+            <button class="btn btn--small" id="bhClear" type="button">Clear</button>
+            <button class="btn btn--small is-active" id="bhDisk" type="button">Disk</button>
+            <button class="btn btn--small is-active" id="bhGrid" type="button">Grid</button>
+          </div>
+          <span class="sim-readout" id="bhOutcome">Ready</span>
         </div>
       </div>
 
-      <!-- Controls -->
-      <div class="sim-controls">
-
-        <div>
-          <span class="label" style="margin-bottom:0.5rem">Particle type</span>
-          <div style="display:flex;gap:0.5rem">
-            <button class="btn" id="typePhoton" style="flex:1;font-size:0.65rem;padding:0.45rem 0;border-color:var(--accent);color:var(--accent)">Photon</button>
-            <button class="btn" id="typeMassive" style="flex:1;font-size:0.65rem;padding:0.45rem 0">Massive</button>
+      <aside class="sim-controls" aria-label="Black hole controls">
+        <div class="control-group">
+          <span class="control-label">Particle type</span>
+          <div class="segmented">
+            <button class="btn btn--small is-active" id="bhPhoton" type="button">Photon</button>
+            <button class="btn btn--small" id="bhMassive" type="button">Massive</button>
           </div>
         </div>
 
-        <div>
-          <label>Black hole mass <span id="massVal" style="color:var(--accent);float:right">1.0 M</span></label>
-          <input type="range" id="massSlider" min="0.5" max="3" step="0.1" value="1">
+        <div class="control-group">
+          <label for="bhMass">Black hole mass <span id="bhMassVal">1.0 M</span></label>
+          <input type="range" id="bhMass" min="0.6" max="3" step="0.1" value="1">
         </div>
 
-        <div>
-          <label>Impact parameter b <span id="bVal" style="color:var(--accent);float:right">5.0 M</span></label>
-          <input type="range" id="bSlider" min="2.6" max="20" step="0.1" value="5">
+        <div class="control-group">
+          <label for="bhImpact">Impact parameter <span id="bhImpactVal">5.2 M</span></label>
+          <input type="range" id="bhImpact" min="2.7" max="22" step="0.1" value="5.2">
         </div>
 
-        <div id="energyRow">
-          <label>Energy E/m (massive) <span id="eVal" style="color:var(--accent);float:right">1.10</span></label>
-          <input type="range" id="eSlider" min="1.005" max="2" step="0.005" value="1.10">
+        <div class="control-group" id="bhEnergyGroup">
+          <label for="bhEnergy">Energy E/m <span id="bhEnergyVal">1.080</span></label>
+          <input type="range" id="bhEnergy" min="1.005" max="1.8" step="0.005" value="1.08">
         </div>
 
-        <div>
-          <label>Integration steps <span id="stepsVal" style="color:var(--accent);float:right">8000</span></label>
-          <input type="range" id="stepsSlider" min="2000" max="20000" step="1000" value="8000">
+        <div class="control-group">
+          <label for="bhAngle">Launch angle <span id="bhAngleVal">0 deg</span></label>
+          <input type="range" id="bhAngle" min="-55" max="55" step="1" value="0">
         </div>
 
-        <div>
-          <label>Trail colour</label>
-          <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
-            <button class="btn color-btn" data-color="#c8b8ff" style="background:#c8b8ff;width:22px;height:22px;padding:0;border-radius:50%;min-width:0;border:2px solid #c8b8ff"></button>
-            <button class="btn color-btn" data-color="#7ee8c8" style="background:#7ee8c8;width:22px;height:22px;padding:0;border-radius:50%;min-width:0;border:2px solid #7ee8c8"></button>
-            <button class="btn color-btn" data-color="#f0c87a" style="background:#f0c87a;width:22px;height:22px;padding:0;border-radius:50%;min-width:0;border:2px solid #f0c87a"></button>
-            <button class="btn color-btn" data-color="#ff8a70" style="background:#ff8a70;width:22px;height:22px;padding:0;border-radius:50%;min-width:0;border:2px solid #ff8a70"></button>
-            <button class="btn color-btn" data-color="#70d4ff" style="background:#70d4ff;width:22px;height:22px;padding:0;border-radius:50%;min-width:0;border:2px solid #70d4ff"></button>
+        <div class="control-group">
+          <label for="bhSteps">Integration steps <span id="bhStepsVal">9000</span></label>
+          <input type="range" id="bhSteps" min="2500" max="18000" step="500" value="9000">
+        </div>
+
+        <div class="control-group">
+          <span class="control-label">Trail color</span>
+          <div class="swatches" id="bhSwatches">
+            <button class="swatch is-active" type="button" style="--swatch:#6ee7f0" data-color="#6ee7f0" aria-label="Cyan trail"></button>
+            <button class="swatch" type="button" style="--swatch:#8cf5bd" data-color="#8cf5bd" aria-label="Mint trail"></button>
+            <button class="swatch" type="button" style="--swatch:#f4bd64" data-color="#f4bd64" aria-label="Amber trail"></button>
+            <button class="swatch" type="button" style="--swatch:#ff7d90" data-color="#ff7d90" aria-label="Rose trail"></button>
+            <button class="swatch" type="button" style="--swatch:#b8a4ff" data-color="#b8a4ff" aria-label="Violet trail"></button>
           </div>
         </div>
 
-        <button class="btn btn--accent" id="launchBtn" style="width:100%;margin-top:auto">Launch geodesic</button>
+        <button class="btn btn--accent" id="bhLaunch" type="button">Launch geodesic</button>
 
-        <div style="border-top:1px solid var(--rim);padding-top:1rem;display:grid;gap:0.75rem">
-          <div class="sim-stat">
-            <div class="sim-stat-val" id="statRS">2.00 M</div>
-            <div class="sim-stat-label">Schwarzschild radius r<sub>s</sub></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="sim-stat-val" id="bhRs">2.00 M</div>
+            <div class="sim-stat-label">Event horizon</div>
           </div>
-          <div class="sim-stat">
-            <div class="sim-stat-val" id="statISCO">6.00 M</div>
-            <div class="sim-stat-label">ISCO radius (massive)</div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="bhRph">3.00 M</div>
+            <div class="sim-stat-label">Photon sphere</div>
           </div>
-          <div class="sim-stat">
-            <div class="sim-stat-val" id="statPhoton">3.00 M</div>
-            <div class="sim-stat-label">Photon sphere r<sub>ph</sub></div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="bhIsco">6.00 M</div>
+            <div class="sim-stat-label">ISCO</div>
           </div>
-          <div class="sim-stat">
-            <div class="sim-stat-val" id="statBC">5.196 M</div>
-            <div class="sim-stat-label">Critical impact b<sub>c</sub></div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="bhBc">5.196 M</div>
+            <div class="sim-stat-label">Critical b</div>
           </div>
         </div>
-      </div>
+      </aside>
     </div>
 
-    <!-- Click-to-aim hint -->
-    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:2rem;text-align:center">
-      Click anywhere on the canvas to launch a geodesic aimed at that point — or use the controls and Launch button.
-    </p>
+    <p class="hint" style="margin-top:1rem">Click the canvas to launch toward a chosen region, or use the controls for repeatable paths.</p>
+  </div>
+</section>
 
-    <div class="divider" style="margin-bottom:2.5rem"></div>
-
-    <!-- Physics notes -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem">
-      <div>
-        <span class="label">Schwarzschild metric</span>
-        <h3 style="margin-bottom:1rem">The geometry</h3>
-        <p style="font-size:0.82rem">The Schwarzschild metric describes spacetime curvature outside a spherically symmetric, non-rotating mass in geometric units (G = c = 1):</p>
-        <div style="background:var(--surface);border:1px solid var(--rim);padding:1rem 1.25rem;margin:1rem 0;border-radius:2px;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);line-height:1.9">
-          ds² = −(1 − r<sub>s</sub>/r) dt² + (1 − r<sub>s</sub>/r)<sup>−1</sup> dr² + r² dΩ²
+<section class="section band">
+  <div class="wrap">
+    <div class="grid-2">
+      <article class="card">
+        <span class="label">Geometry</span>
+        <h3>Schwarzschild metric</h3>
+        <p>
+          The simulation assumes a non-rotating, uncharged black hole. The event horizon sits at
+          r = 2M, the photon sphere at r = 3M, and the innermost stable circular orbit for massive
+          particles at r = 6M.
+        </p>
+        <div class="equation-card">
+          ds^2 = -(1 - 2M/r)dt^2 + (1 - 2M/r)^-1 dr^2 + r^2 dOmega^2
         </div>
-        <p style="font-size:0.82rem">where r<sub>s</sub> = 2GM/c² is the Schwarzschild radius. The simulation works in the equatorial plane (θ = π/2), so dΩ² = dφ².</p>
-      </div>
-      <div>
-        <span class="label">Equations of motion</span>
-        <h3 style="margin-bottom:1rem">The geodesic equations</h3>
-        <p style="font-size:0.82rem">Two conserved quantities arise from the metric's symmetries: energy E and angular momentum L. Setting b = L/E (impact parameter):</p>
-        <div style="background:var(--surface);border:1px solid var(--rim);padding:1rem 1.25rem;margin:1rem 0;border-radius:2px;font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--text);line-height:2">
-          (dr/dλ)² = E² − (1 − r<sub>s</sub>/r)(L²/r² + ε)
+      </article>
+      <article class="card">
+        <span class="label">Integrator</span>
+        <h3>Effective potential</h3>
+        <p>
+          Paths are integrated from the radial effective-potential equations using RK4. The step size
+          is reduced near the horizon to keep the plotted trajectory stable.
+        </p>
+        <div class="equation-card">
+          (dr/dlambda)^2 = E^2 - (1 - 2M/r)(L^2/r^2 + epsilon)
         </div>
-        <p style="font-size:0.82rem">where ε = 0 for photons (null geodesics) and ε = 1 for massive particles (timelike geodesics). Integrated via RK4 with adaptive step control near r<sub>s</sub>.</p>
-      </div>
+      </article>
     </div>
-
   </div>
 </section>
 
 <script>
 (function () {
-  // ── Canvas setup ─────────────────────────────────────────
-  const canvas = document.getElementById('bhCanvas');
-  const ctx    = canvas.getContext('2d');
-  let W, H, scale, cx, cy;
+  const canvas = document.getElementById('blackholeCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  const dpr = window.devicePixelRatio || 1;
+  const ui = {
+    mass: document.getElementById('bhMass'),
+    impact: document.getElementById('bhImpact'),
+    energy: document.getElementById('bhEnergy'),
+    angle: document.getElementById('bhAngle'),
+    steps: document.getElementById('bhSteps'),
+    massVal: document.getElementById('bhMassVal'),
+    impactVal: document.getElementById('bhImpactVal'),
+    energyVal: document.getElementById('bhEnergyVal'),
+    angleVal: document.getElementById('bhAngleVal'),
+    stepsVal: document.getElementById('bhStepsVal'),
+    rs: document.getElementById('bhRs'),
+    rph: document.getElementById('bhRph'),
+    isco: document.getElementById('bhIsco'),
+    bc: document.getElementById('bhBc'),
+    outcome: document.getElementById('bhOutcome'),
+    energyGroup: document.getElementById('bhEnergyGroup')
+  };
+
+  const state = {
+    M: 1,
+    b: 5.2,
+    energy: 1.08,
+    angle: 0,
+    steps: 9000,
+    particle: 'photon',
+    color: '#6ee7f0',
+    disk: true,
+    grid: true,
+    paths: []
+  };
+
+  let width = 0;
+  let height = 0;
+  let cx = 0;
+  let cy = 0;
+  let scale = 1;
+  let stars = [];
+
+  function seeded(i, salt) {
+    const x = Math.sin(i * 129.2 + salt * 43.7) * 10000;
+    return x - Math.floor(x);
+  }
 
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
-    W = rect.width;
-    H = rect.height || 580;
-    canvas.width  = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width  = W + 'px';
-    canvas.style.height = H + 'px';
+    width = rect.width;
+    height = Math.max(rect.height, 620);
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cx = W / 2;
-    cy = H / 2;
-    scale = Math.min(W, H) / (40 * M);  // pixels per M
-    drawBackground();
-    redrawPaths();
+    cx = width / 2;
+    cy = height / 2;
+    scale = Math.min(width, height) / (44 * state.M);
+    stars = Array.from({ length: 220 }, (_, i) => ({
+      x: seeded(i, 1) * width,
+      y: seeded(i, 2) * height,
+      r: 0.4 + seeded(i, 3) * 1.3,
+      a: 0.14 + seeded(i, 4) * 0.44
+    }));
   }
 
-  window.addEventListener('resize', () => setTimeout(resize, 50));
-
-  // ── State ─────────────────────────────────────────────────
-  let M = 1.0;
-  let b = 5.0;
-  let E = 1.10;
-  let steps = 8000;
-  let isPhoton = true;
-  let showAccDisk = true;
-  let showGrid = true;
-  let trailColor = '#c8b8ff';
-  let paths = [];   // [{points, color}]
-
-  // ── UI elements ───────────────────────────────────────────
-  const massSlider  = document.getElementById('massSlider');
-  const bSlider     = document.getElementById('bSlider');
-  const eSlider     = document.getElementById('eSlider');
-  const stepsSlider = document.getElementById('stepsSlider');
-  const massVal     = document.getElementById('massVal');
-  const bVal        = document.getElementById('bVal');
-  const eVal        = document.getElementById('eVal');
-  const stepsVal    = document.getElementById('stepsVal');
-  const launchBtn   = document.getElementById('launchBtn');
-  const clearBtn    = document.getElementById('clearBtn');
-  const photonBtn   = document.getElementById('typePhoton');
-  const massiveBtn  = document.getElementById('typeMassive');
-  const energyRow   = document.getElementById('energyRow');
-
-  const statRS     = document.getElementById('statRS');
-  const statISCO   = document.getElementById('statISCO');
-  const statPhoton = document.getElementById('statPhoton');
-  const statBC     = document.getElementById('statBC');
-
-  function updateStats() {
-    const rs   = 2 * M;
-    const isco = 6 * M;
-    const rph  = 3 * M;
-    const bc   = rph * Math.sqrt(1 / (1 - rs / rph));
-    statRS.textContent     = rs.toFixed(2)   + ' M';
-    statISCO.textContent   = isco.toFixed(2) + ' M';
-    statPhoton.textContent = rph.toFixed(2)  + ' M';
-    statBC.textContent     = bc.toFixed(3)   + ' M';
-  }
-
-  massSlider.addEventListener('input', () => {
-    M = parseFloat(massSlider.value);
-    massVal.textContent = M.toFixed(1) + ' M';
-    bSlider.min = (2 * M * 1.3).toFixed(2);
-    updateStats();
-    resize();
-  });
-
-  bSlider.addEventListener('input', () => {
-    b = parseFloat(bSlider.value);
-    bVal.textContent = b.toFixed(1) + ' M';
-  });
-
-  eSlider.addEventListener('input', () => {
-    E = parseFloat(eSlider.value);
-    eVal.textContent = E.toFixed(3);
-  });
-
-  stepsSlider.addEventListener('input', () => {
-    steps = parseInt(stepsSlider.value);
-    stepsVal.textContent = steps.toString();
-  });
-
-  photonBtn.addEventListener('click', () => {
-    isPhoton = true;
-    photonBtn.style.borderColor = 'var(--accent)';
-    photonBtn.style.color = 'var(--accent)';
-    massiveBtn.style.borderColor = 'var(--rim)';
-    massiveBtn.style.color = 'var(--muted)';
-    energyRow.style.opacity = '0.35';
-    energyRow.style.pointerEvents = 'none';
-  });
-
-  massiveBtn.addEventListener('click', () => {
-    isPhoton = false;
-    massiveBtn.style.borderColor = 'var(--accent)';
-    massiveBtn.style.color = 'var(--accent)';
-    photonBtn.style.borderColor = 'var(--rim)';
-    photonBtn.style.color = 'var(--muted)';
-    energyRow.style.opacity = '1';
-    energyRow.style.pointerEvents = 'auto';
-  });
-
-  energyRow.style.opacity = '0.35';
-  energyRow.style.pointerEvents = 'none';
-
-  clearBtn.addEventListener('click', () => { paths = []; drawBackground(); });
-
-  document.getElementById('toggleAccDisk').addEventListener('click', function() {
-    showAccDisk = !showAccDisk;
-    this.textContent = 'Accretion disk: ' + (showAccDisk ? 'on' : 'off');
-    drawBackground(); redrawPaths();
-  });
-
-  document.getElementById('toggleGrid').addEventListener('click', function() {
-    showGrid = !showGrid;
-    this.textContent = 'Grid: ' + (showGrid ? 'on' : 'off');
-    drawBackground(); redrawPaths();
-  });
-
-  document.querySelectorAll('.color-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      trailColor = btn.dataset.color;
-      document.querySelectorAll('.color-btn').forEach(b => b.style.outline = 'none');
-      btn.style.outline = '2px solid #fff';
-      btn.style.outlineOffset = '2px';
-    });
-  });
-  document.querySelectorAll('.color-btn')[0].style.outline = '2px solid #fff';
-  document.querySelectorAll('.color-btn')[0].style.outlineOffset = '2px';
-
-  launchBtn.addEventListener('click', () => {
-    computeAndDraw(b, isPhoton, E, trailColor);
-  });
-
-  // Click on canvas
-  canvas.addEventListener('click', e => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left - cx;
-    const my = cy - (e.clientY - rect.top);
-    // Compute b from click position — perpendicular distance from BH to ray direction
-    const r_click = Math.sqrt(mx * mx + my * my) / scale;
-    const angle   = Math.atan2(my, mx);
-    // Treat click as impact point; infer b as r * sin(angle from infall axis)
-    // Simple approach: use distance as b with some angle modulation
-    const clickB = Math.max(2.6 * M, r_click * Math.abs(Math.sin(angle - Math.PI / 4)) * 1.5 + 2 * M);
-    computeAndDraw(clickB, isPhoton, E, trailColor);
-  });
-
-  // ── World → screen ─────────────────────────────────────────
   function toScreen(x, y) {
     return [cx + x * scale, cy - y * scale];
   }
 
-  // ── RK4 geodesic integration ──────────────────────────────
-  // State: [r, phi, dr/dlambda, dphi/dlambda]
-  // Conserved: L = r² dphi/dlambda, E (energy)
-  // For photon: epsilon=0; massive: epsilon=1
-  // dr²/dlambda² comes from the effective potential
+  function rotatePoint(point, deg) {
+    const a = deg * Math.PI / 180;
+    const c = Math.cos(a);
+    const s = Math.sin(a);
+    return [point[0] * c - point[1] * s, point[0] * s + point[1] * c];
+  }
 
-  function geodesicDerivs(state, M, L, eps) {
-    const [r, phi, rdot, phidot] = state;
+  function updateStats() {
+    const rs = 2 * state.M;
+    const rph = 3 * state.M;
+    const isco = 6 * state.M;
+    const bc = rph / Math.sqrt(1 - rs / rph);
+    ui.rs.textContent = rs.toFixed(2) + ' M';
+    ui.rph.textContent = rph.toFixed(2) + ' M';
+    ui.isco.textContent = isco.toFixed(2) + ' M';
+    ui.bc.textContent = bc.toFixed(3) + ' M';
+    ui.massVal.textContent = state.M.toFixed(1) + ' M';
+    ui.impactVal.textContent = state.b.toFixed(1) + ' M';
+    ui.energyVal.textContent = state.energy.toFixed(3);
+    ui.angleVal.textContent = state.angle + ' deg';
+    ui.stepsVal.textContent = String(state.steps);
+  }
+
+  function derivs(s, M, L, eps) {
+    const r = Math.max(s[0], 0.0001);
+    const rdot = s[2];
+    const phidot = s[3];
+    const f = 1 - (2 * M) / r;
+    const radialGravity = eps === 0 ? -M / (r * r) : -M * f / (r * r);
+    const centrifugal = (L * L * (r - 3 * M)) / Math.pow(r, 4);
+    return [
+      rdot,
+      phidot,
+      radialGravity + centrifugal,
+      -2 * rdot * phidot / r
+    ];
+  }
+
+  function rk4(s, h, M, L, eps) {
+    const k1 = derivs(s, M, L, eps);
+    const s2 = s.map((v, i) => v + 0.5 * h * k1[i]);
+    const k2 = derivs(s2, M, L, eps);
+    const s3 = s.map((v, i) => v + 0.5 * h * k2[i]);
+    const k3 = derivs(s3, M, L, eps);
+    const s4 = s.map((v, i) => v + h * k3[i]);
+    const k4 = derivs(s4, M, L, eps);
+    return s.map((v, i) => v + (h / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+  }
+
+  function integrate(b, angleDeg) {
+    const M = state.M;
     const rs = 2 * M;
-    const f  = 1 - rs / r;
-
-    // rdot² from first integral (already have rdot directly)
-    // rdotdot from geodesic equation:
-    // d²r/dλ² = -M/r² + L²(r-3M)/r⁴  (photon)
-    // d²r/dλ² = -M/r²·f + L²(r-3M)/r⁴  (massive, simplified)
-    const rdotdot = -M / (r * r) * (eps === 0 ? 1 : f) + (L * L * (r - 3 * M)) / (r * r * r * r);
-    const phidotdot = -2 * rdot * phidot / r;
-
-    return [rdot, phidot, rdotdot, phidotdot];
-  }
-
-  function rk4Step(state, dlam, M, L, eps) {
-    const k1 = geodesicDerivs(state, M, L, eps);
-    const s2 = state.map((s, i) => s + 0.5 * dlam * k1[i]);
-    const k2 = geodesicDerivs(s2, M, L, eps);
-    const s3 = state.map((s, i) => s + 0.5 * dlam * k2[i]);
-    const k3 = geodesicDerivs(s3, M, L, eps);
-    const s4 = state.map((s, i) => s + dlam * k3[i]);
-    const k4 = geodesicDerivs(s4, M, L, eps);
-    return state.map((s, i) => s + dlam / 6 * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]));
-  }
-
-  function integrate(b_param, photon, E_param, nSteps) {
-    const rs  = 2 * M;
-    const eps = photon ? 0 : 1;
-    const L   = b_param * E_param;  // angular momentum
-
-    // Start far out, incoming from right
-    const r0  = 40 * M;
-    const phi0 = 0;
-
-    // Initial dr/dlam from first integral
-    // (dr/dlam)² = E² - (1 - rs/r)(L²/r² + eps)
-    const Veff0 = (1 - rs / r0) * (L * L / (r0 * r0) + eps);
-    const rdot0 = -Math.sqrt(Math.max(0, E_param * E_param - Veff0));  // negative = inward
-
+    const eps = state.particle === 'photon' ? 0 : 1;
+    const E = eps === 0 ? 1 : state.energy;
+    const L = b * E;
+    const r0 = 42 * M;
+    const vEff = (1 - rs / r0) * ((L * L) / (r0 * r0) + eps);
+    let rdot0 = -Math.sqrt(Math.max(0.0001, E * E - vEff));
     const phidot0 = L / (r0 * r0);
-
-    let state = [r0, phi0, rdot0, phidot0];
+    let s = [r0, 0, rdot0, phidot0];
     const points = [];
-    const dlam = 0.4 * M;  // affine parameter step
+    let minR = r0;
+    let outcome = 'Escaped';
 
-    for (let i = 0; i < nSteps; i++) {
-      const [r, phi] = state;
-      points.push([r * Math.cos(phi), r * Math.sin(phi)]);
+    for (let i = 0; i < state.steps; i++) {
+      const r = s[0];
+      const phi = s[1];
+      minR = Math.min(minR, r);
+      points.push(rotatePoint([r * Math.cos(phi), r * Math.sin(phi)], angleDeg));
 
-      // Termination conditions
-      if (r < rs * 1.01) break;          // fell inside
-      if (r > 60 * M && i > 50) break;  // escaped
-      if (!isFinite(r) || r < 0) break;
+      if (!Number.isFinite(r) || r <= rs * 1.012) {
+        outcome = 'Captured';
+        break;
+      }
+      if (r > 64 * M && i > 100) {
+        outcome = 'Escaped';
+        break;
+      }
 
-      // Adaptive step: smaller near BH
-      const stepScale = Math.min(1, (r - rs) / (2 * M));
-      const adaptedDlam = dlam * (0.1 + 0.9 * stepScale);
-
-      state = rk4Step(state, adaptedDlam, M, L, eps);
+      const near = Math.max(0.08, Math.min(1, (r - rs) / (4 * M)));
+      const step = 0.22 * M * near;
+      s = rk4(s, step, M, L, eps);
     }
 
-    return points;
+    return { points, minR, outcome };
   }
 
-  // ── Drawing ───────────────────────────────────────────────
-  function drawBackground() {
-    ctx.clearRect(0, 0, W, H);
+  function launch(customB, customAngle) {
+    const b = customB || state.b;
+    const angle = customAngle === undefined ? state.angle : customAngle;
+    const result = integrate(b, angle);
+    state.paths.push({
+      points: result.points,
+      color: state.color,
+      particle: state.particle,
+      outcome: result.outcome
+    });
+    if (state.paths.length > 24) state.paths.shift();
+    ui.outcome.textContent = result.outcome + ' - min r ' + result.minR.toFixed(2) + ' M';
+  }
 
-    // Space background gradient
-    const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.7);
-    bg.addColorStop(0,   '#0a0510');
-    bg.addColorStop(0.5, '#050308');
-    bg.addColorStop(1,   '#020205');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
-
-    // Stars
-    const seed = 42;
-    for (let i = 0; i < 200; i++) {
-      const sx = ((Math.sin(i * 127.1 + seed) * 0.5 + 0.5)) * W;
-      const sy = ((Math.sin(i * 311.7 + seed) * 0.5 + 0.5)) * H;
-      const sr = Math.sin(i * 53.3) * 0.8 + 0.9;
-      const op = Math.sin(i * 71.9) * 0.3 + 0.4;
-      ctx.beginPath();
-      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(200,184,255,${op})`;
-      ctx.fill();
-    }
-
-    // Coordinate grid
-    if (showGrid) {
-      ctx.strokeStyle = 'rgba(200,184,255,0.04)';
-      ctx.lineWidth = 0.5;
-      const gridStep = 5 * scale;
-      for (let x = cx % gridStep; x < W; x += gridStep) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-      }
-      for (let y = cy % gridStep; y < H; y += gridStep) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-      }
-    }
-
-    const rs   = 2 * M;
-    const isco = 6 * M;
-    const rph  = 3 * M;
-
-    // Accretion disk
-    if (showAccDisk) {
-      const diskInner = isco * scale;
-      const diskOuter = 18 * M * scale;
-      const diskGrad = ctx.createRadialGradient(cx, cy, diskInner, cx, cy, diskOuter);
-      diskGrad.addColorStop(0,   'rgba(240, 160, 60, 0.55)');
-      diskGrad.addColorStop(0.3, 'rgba(220, 120, 40, 0.3)');
-      diskGrad.addColorStop(0.7, 'rgba(200, 80, 30, 0.1)');
-      diskGrad.addColorStop(1,   'rgba(180, 60, 20, 0.0)');
-      ctx.beginPath();
-      ctx.arc(cx, cy, diskOuter, 0, Math.PI * 2);
-      ctx.arc(cx, cy, diskInner, 0, Math.PI * 2, true);
-      ctx.fillStyle = diskGrad;
-      ctx.fill();
-    }
-
-    // ISCO ring
-    ctx.beginPath();
-    ctx.arc(cx, cy, isco * scale, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(240,200,122,0.18)';
+  function drawGrid() {
+    if (!state.grid) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(110, 231, 240, 0.055)';
     ctx.lineWidth = 1;
-    ctx.setLineDash([3, 5]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Photon sphere
-    ctx.beginPath();
-    ctx.arc(cx, cy, rph * scale, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(200,184,255,0.2)';
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-
-    // Event horizon glow
-    const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rs * scale * 2.5);
-    glowGrad.addColorStop(0,    'rgba(120, 60, 255, 0.35)');
-    glowGrad.addColorStop(0.35, 'rgba(80, 30, 200, 0.18)');
-    glowGrad.addColorStop(0.7,  'rgba(40, 10, 120, 0.06)');
-    glowGrad.addColorStop(1,    'rgba(0,0,0,0)');
-    ctx.beginPath();
-    ctx.arc(cx, cy, rs * scale * 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = glowGrad;
-    ctx.fill();
-
-    // Event horizon — solid black
-    ctx.beginPath();
-    ctx.arc(cx, cy, rs * scale, 0, Math.PI * 2);
-    ctx.fillStyle = '#000';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(160,120,255,0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Labels
-    ctx.font = `300 10px 'DM Mono', monospace`;
-    ctx.fillStyle = 'rgba(200,184,255,0.5)';
-    ctx.textAlign = 'left';
-    ctx.fillText('r = 3M (photon sphere)', cx + rph * scale + 6, cy - 6);
-    ctx.fillStyle = 'rgba(240,200,122,0.5)';
-    ctx.fillText('r = 6M (ISCO)', cx + isco * scale + 6, cy - 6);
-
-    // Axes labels
-    ctx.fillStyle = 'rgba(120,120,140,0.4)';
-    ctx.font = `300 9px 'DM Mono', monospace`;
-    ctx.textAlign = 'center';
-    ctx.fillText('x / M', W - 24, cy + 14);
-    ctx.textAlign = 'left';
-    ctx.fillText('y / M', cx + 6, 14);
-  }
-
-  function drawPath(points, color) {
-    if (points.length < 2) return;
-    ctx.beginPath();
-    ctx.lineWidth = 1.4;
-    ctx.strokeStyle = color;
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = color;
-    let first = true;
-    for (const [x, y] of points) {
-      const [sx, sy] = toScreen(x, y);
-      if (first) { ctx.moveTo(sx, sy); first = false; }
-      else ctx.lineTo(sx, sy);
+    const step = 5 * state.M * scale;
+    for (let x = cx % step; x < width; x += step) {
+      const dx = (x - cx) / scale;
+      const bend = Math.max(0, 1 - Math.abs(dx) / 24);
+      ctx.beginPath();
+      for (let y = 0; y <= height; y += 14) {
+        const dy = y - cy;
+        const pull = bend * 10 * Math.sin((y - cy) / 92);
+        if (y === 0) ctx.moveTo(x + pull, y);
+        else ctx.lineTo(x + pull, y);
+      }
+      ctx.stroke();
     }
-    ctx.stroke();
-    ctx.shadowBlur = 0;
+    for (let y = cy % step; y < height; y += step) {
+      const dy = (y - cy) / scale;
+      const bend = Math.max(0, 1 - Math.abs(dy) / 24);
+      ctx.beginPath();
+      for (let x = 0; x <= width; x += 14) {
+        const pull = bend * 10 * Math.sin((x - cx) / 92);
+        if (x === 0) ctx.moveTo(x, y + pull);
+        else ctx.lineTo(x, y + pull);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 
-    // Starting dot
-    const [x0, y0] = points[0];
-    const [sx0, sy0] = toScreen(x0, y0);
+  function drawAccretion(time) {
+    if (!state.disk) return;
+    const M = state.M;
+    const inner = 6 * M * scale;
+    const outer = 18 * M * scale;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-0.18);
+    ctx.scale(1, 0.34);
+    for (let i = 0; i < 80; i++) {
+      const start = (i / 80) * Math.PI * 2 + time * 0.00045;
+      const end = start + 0.055 + Math.sin(i) * 0.01;
+      const radius = inner + (outer - inner) * ((i % 17) / 17);
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, start, end);
+      ctx.strokeStyle = i % 3 === 0 ? 'rgba(244, 189, 100, 0.55)' : i % 3 === 1 ? 'rgba(255, 125, 144, 0.38)' : 'rgba(110, 231, 240, 0.32)';
+      ctx.lineWidth = 1.6 + (i % 5) * 0.4;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawRings() {
+    const M = state.M;
+    const rs = 2 * M * scale;
+    const rph = 3 * M * scale;
+    const isco = 6 * M * scale;
+
+    ctx.save();
+    ctx.setLineDash([4, 7]);
+    ctx.strokeStyle = 'rgba(244, 189, 100, 0.32)';
     ctx.beginPath();
-    ctx.arc(sx0, sy0, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
+    ctx.arc(cx, cy, isco, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(110, 231, 240, 0.34)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, rph, 0, Math.PI * 2);
+    ctx.stroke();
+
+    const glow = ctx.createRadialGradient(cx, cy, rs * 0.3, cx, cy, rs * 3.2);
+    glow.addColorStop(0, 'rgba(0,0,0,1)');
+    glow.addColorStop(0.36, 'rgba(0,0,0,0.98)');
+    glow.addColorStop(0.62, 'rgba(110,231,240,0.12)');
+    glow.addColorStop(1, 'rgba(110,231,240,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rs * 3.2, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(cx, cy, rs, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(238, 244, 242, 0.42)';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+    ctx.restore();
   }
 
-  function redrawPaths() {
-    for (const { points, color } of paths) drawPath(points, color);
+  function drawPaths() {
+    state.paths.forEach((path) => {
+      if (path.points.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = path.color;
+      ctx.lineWidth = path.particle === 'photon' ? 1.7 : 2.1;
+      ctx.shadowColor = path.color;
+      ctx.shadowBlur = 9;
+      ctx.beginPath();
+      path.points.forEach((point, i) => {
+        const [x, y] = toScreen(point[0], point[1]);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      const first = path.points[0];
+      const [sx, sy] = toScreen(first[0], first[1]);
+      ctx.fillStyle = path.color;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
   }
 
-  function computeAndDraw(bParam, photon, eParam, color) {
-    const points = integrate(bParam, photon, eParam, steps);
-    paths.push({ points, color });
-    drawBackground();
-    redrawPaths();
+  function drawLabels() {
+    ctx.save();
+    ctx.font = '700 11px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(238,244,242,0.55)';
+    ctx.fillText('r = 3M photon sphere', cx + 3 * state.M * scale + 8, cy - 8);
+    ctx.fillStyle = 'rgba(244,189,100,0.55)';
+    ctx.fillText('r = 6M ISCO', cx + 6 * state.M * scale + 8, cy - 8);
+    ctx.restore();
   }
 
-  // ── Init ──────────────────────────────────────────────────
+  function draw(time) {
+    const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height));
+    bg.addColorStop(0, '#120b12');
+    bg.addColorStop(0.48, '#07090d');
+    bg.addColorStop(1, '#020304');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, height);
+
+    stars.forEach((s) => {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(238,244,242,' + s.a + ')';
+      ctx.fill();
+    });
+
+    drawGrid();
+    drawAccretion(time);
+    drawRings();
+    drawPaths();
+    drawLabels();
+    requestAnimationFrame(draw);
+  }
+
+  function syncFromInputs() {
+    state.M = parseFloat(ui.mass.value);
+    state.b = parseFloat(ui.impact.value);
+    state.energy = parseFloat(ui.energy.value);
+    state.angle = parseInt(ui.angle.value, 10);
+    state.steps = parseInt(ui.steps.value, 10);
+    ui.impact.min = (2.65 * state.M).toFixed(2);
+    if (state.b < parseFloat(ui.impact.min)) {
+      state.b = parseFloat(ui.impact.min);
+      ui.impact.value = state.b;
+    }
+    updateStats();
+    resize();
+  }
+
+  ['input', 'change'].forEach((eventName) => {
+    [ui.mass, ui.impact, ui.energy, ui.angle, ui.steps].forEach((input) => {
+      input.addEventListener(eventName, syncFromInputs);
+    });
+  });
+
+  document.getElementById('bhPhoton').addEventListener('click', (event) => {
+    state.particle = 'photon';
+    event.currentTarget.classList.add('is-active');
+    document.getElementById('bhMassive').classList.remove('is-active');
+    ui.energyGroup.style.opacity = '0.45';
+  });
+
+  document.getElementById('bhMassive').addEventListener('click', (event) => {
+    state.particle = 'massive';
+    event.currentTarget.classList.add('is-active');
+    document.getElementById('bhPhoton').classList.remove('is-active');
+    ui.energyGroup.style.opacity = '1';
+  });
+
+  document.getElementById('bhLaunch').addEventListener('click', () => launch());
+  document.getElementById('bhClear').addEventListener('click', () => {
+    state.paths = [];
+    ui.outcome.textContent = 'Cleared';
+  });
+
+  document.getElementById('bhDisk').addEventListener('click', (event) => {
+    state.disk = !state.disk;
+    event.currentTarget.classList.toggle('is-active', state.disk);
+  });
+
+  document.getElementById('bhGrid').addEventListener('click', (event) => {
+    state.grid = !state.grid;
+    event.currentTarget.classList.toggle('is-active', state.grid);
+  });
+
+  document.querySelectorAll('#bhSwatches .swatch').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('#bhSwatches .swatch').forEach((item) => item.classList.remove('is-active'));
+      button.classList.add('is-active');
+      state.color = button.dataset.color;
+    });
+  });
+
+  canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left - cx) / scale;
+    const y = (cy - (event.clientY - rect.top)) / scale;
+    const clickB = Math.max(2.7 * state.M, Math.min(22 * state.M, Math.hypot(x, y) * 0.42));
+    const clickAngle = Math.atan2(y, x) * 180 / Math.PI;
+    launch(clickB, clickAngle);
+  });
+
+  window.addEventListener('resize', resize);
+
+  ui.energyGroup.style.opacity = '0.45';
+  syncFromInputs();
+  resize();
   updateStats();
-  setTimeout(resize, 80);
 
-  // Launch a few demo geodesics on load
+  requestAnimationFrame(draw);
+
   setTimeout(() => {
-    const colors = ['#c8b8ff', '#7ee8c8', '#f0c87a', '#ff8a70', '#70d4ff'];
-    const bs = [3.2, 4.5, 6.0, 8.5, 14.0];
-    bs.forEach((bi, i) => computeAndDraw(bi * M, true, 1.0, colors[i % colors.length]));
+    ['#6ee7f0', '#8cf5bd', '#f4bd64', '#ff7d90'].forEach((color, i) => {
+      state.color = color;
+      launch([3.2, 4.8, 7.4, 12.8][i] * state.M, [-18, -7, 8, 19][i]);
+    });
+    state.color = '#6ee7f0';
   }, 150);
-
 })();
 </script>
