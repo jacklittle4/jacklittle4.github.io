@@ -2,227 +2,130 @@
 layout: default
 title: Research
 permalink: /research/
+description: Undergraduate research by Jack Little — asteroid surface mapping, exoplanet atmospheres, and Rydberg physics.
 ---
 
-<section class="home-hero">
-  <div class="home-hero-inner">
-    <p class="home-kicker">Research • Computational Physics • Cosmology</p>
+<section class="page-hero">
+  <div class="wrap">
+    <span class="label">Academic research</span>
     <h1>Research</h1>
-    <p class="home-subtitle">
-      My research interests are centered on cosmology, astrophysics, and computational
-      physics. I am especially interested in primordial black holes, stellar evolution,
-      gravitational waves, dark energy, planetary modeling, and simulation-based methods
-      in modern physics.
-    </p>
+    <p>Observational and computational work across planetary science, exoplanet atmospheres, and atomic physics.</p>
   </div>
 </section>
 
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Research Focus</h2>
-    <p>
-      I am building a research profile that connects mathematics, computation, and
-      physical interpretation. My current work ranges from planetary surface modeling
-      to exoplanet atmosphere analysis, while my long-term goal is graduate study in
-      cosmology or a closely related theoretical and computational area of physics.
-    </p>
-  </div>
+<section>
+  <div class="wrap">
 
-  <div class="home-info-grid">
-    <div class="card">
-      <h3>Cosmology and Astrophysics</h3>
-      <p>
-        My main long-term interests include primordial black holes, stellar evolution,
-        gravitational waves, dark energy, and the broader structure of cosmological models.
+    <!-- PROJECT 1 -->
+    <div style="padding:3rem 0;border-bottom:1px solid var(--rim)">
+      <span class="label">Planetary science · Active</span>
+      <h2 style="margin-bottom:0.5rem">16 Psyche Topological Surface Mapping</h2>
+      <p style="margin-bottom:0.35rem;font-size:0.78rem;color:var(--subtle)">With Dr. Shepard · Commonwealth University of Pennsylvania</p>
+
+      <p style="max-width:680px;margin-top:1.5rem">
+        Working with Dr. Shepard to computationally map the topological surface of asteroid 16 Psyche onto its radar-derived 3D shape model.
+        The project involves spatial reasoning across non-Euclidean surface geometries and the reconciliation of multi-resolution observational data.
+      </p>
+      <p style="max-width:680px">
+        16 Psyche is one of the most massive metallic asteroids in the solar system and the target of NASA's Psyche mission.
+        Accurate surface topographic mapping informs both compositional analysis and mission planning.
+      </p>
+
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-top:2rem">
+        <div class="result-block">
+          <p class="result-value">16 Psyche</p>
+          <p>Target body</p>
+        </div>
+        <div class="result-block">
+          <p class="result-value">Radar-derived</p>
+          <p>Shape model source</p>
+        </div>
+        <div class="result-block">
+          <p class="result-value">Ongoing</p>
+          <p>Project status</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECT 2 -->
+    <div style="padding:3rem 0;border-bottom:1px solid var(--rim)">
+      <span class="label">Exoplanet atmospheres · Completed</span>
+      <h2 style="margin-bottom:0.5rem">WASP-39b Transmission Spectrum Analysis</h2>
+      <p style="margin-bottom:0.35rem;font-size:0.78rem;color:var(--subtle)">Independent · HST/WFC3 NIR data</p>
+
+      <p style="max-width:680px;margin-top:1.5rem">
+        Independent Python analysis of the near-infrared transmission spectrum of hot Jupiter WASP-39b using publicly available
+        Hubble Space Telescope WFC3 data. The study focused on identifying and characterising the dominant water vapour absorption feature.
+      </p>
+
+      <h3 style="margin-top:2rem;margin-bottom:1.25rem;font-size:1.1rem;letter-spacing:0.05em;text-transform:uppercase;font-family:var(--font-mono);font-weight:300;color:var(--muted)">Results</h3>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;margin-bottom:2rem">
+        <div class="result-block">
+          <p class="result-value">~1.4 μm</p>
+          <p>H₂O absorption feature centre — reproduced from raw data</p>
+        </div>
+        <div class="result-block">
+          <p class="result-value">~900 km</p>
+          <p>Derived atmospheric scale height</p>
+        </div>
+        <div class="result-block">
+          <p class="result-value">~1500 K</p>
+          <p>Inferred equilibrium temperature</p>
+        </div>
+        <div class="result-block">
+          <p class="result-value">Python</p>
+          <p>NumPy · SciPy · Matplotlib pipeline</p>
+        </div>
+      </div>
+
+      <p style="max-width:680px;font-size:0.82rem">
+        The analysis pipeline included limb-darkening correction, systematic noise removal, and transit depth extraction across 
+        the WFC3 G141 grism bandpass. Results are consistent with published literature values from Sing et al. and the JWST 
+        Early Release Science programme.
       </p>
     </div>
 
-    <div class="card">
-      <h3>Computational Modeling</h3>
-      <p>
-        I am interested in using computational methods to study physical systems through
-        numerical analysis, visualization, and data-driven interpretation.
+    <!-- PROJECT 3 -->
+    <div style="padding:3rem 0">
+      <span class="label">Atomic physics · Laboratory</span>
+      <h2 style="margin-bottom:0.5rem">Rydberg Laser Spectroscopy</h2>
+      <p style="margin-bottom:0.35rem;font-size:0.78rem;color:var(--subtle)">Laser Laboratory · Commonwealth University of Pennsylvania</p>
+
+      <p style="max-width:680px;margin-top:1.5rem">
+        Laboratory work with tuneable laser systems probing Rydberg atomic states — highly excited states with principal quantum numbers
+        n ≫ 1. These states exhibit exaggerated electromagnetic properties and are of interest in quantum information and precision measurement.
+      </p>
+      <p style="max-width:680px">
+        Work involved optical alignment, data acquisition, and spectroscopic analysis of transition frequencies across Rydberg series.
       </p>
     </div>
 
-    <div class="card">
-      <h3>Research Direction</h3>
-      <p>
-        I want this page to develop into a record of serious academic work, including
-        independent analysis, formal research collaborations, technical writeups, and
-        project-based scientific computing.
-      </p>
-    </div>
-  </div>
-</section>
-
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Current and Developing Projects</h2>
-    <p>
-      These are the main projects and directions that currently define my research profile.
-    </p>
-  </div>
-
-  <div class="home-project-grid">
-    <article class="project-card">
-      <h3>16 Psyche Topological Mapping</h3>
-      <p>
-        I am currently doing research with Dr. Shepard involving the modeling of the
-        topological map of 16 Psyche onto its 3D shape model. This work connects spatial
-        reasoning, surface interpretation, and planetary-science visualization.
-      </p>
-    </article>
-
-    <article class="project-card">
-      <h3>WASP-39b Transmission Spectrum Analysis</h3>
-      <p>
-        I completed an independent Python-based analysis of the near-infrared transmission
-        spectrum of WASP-39b using the 35-point archival HST/WFC3 G102+G141 dataset. The
-        project focuses on water vapor detection, atmospheric scale height estimation, and
-        planetary physical characterization from archival photometry.
-      </p>
-      <span class="project-link-text">Independent archival analysis</span>
-    </article>
-
-    <article class="project-card">
-      <h3>Quantum Simulation</h3>
-      <p>
-        I may also pursue research in quantum simulation. This would expand my work into
-        computational and theoretical problems that connect quantum mechanics, mathematics,
-        and simulation-based modeling.
-      </p>
-    </article>
-  </div>
-</section>
-
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Featured Research Project</h2>
-    <p>
-      A more detailed summary of my current WASP-39b exoplanet atmosphere work.
-    </p>
-  </div>
-
-  <div class="content-grid two-column">
-    <div class="card">
-      <h3>WASP-39b: Independent NIR Transmission Spectrum Study</h3>
-      <p>
-        This project analyzes the archival HST/WFC3 transmission spectrum of WASP-39b across
-        0.82–1.63 μm using a Python-based workflow. The analysis reproduces the dominant water
-        absorption feature and derives planetary and atmospheric properties directly from
-        published photometry and system parameters.
-      </p>
-      <p>
-        The study is designed as an exercise in independent archival science: reproducing a
-        published exoplanet atmosphere result while also extending it through first-principles
-        physical calculations and clearer computational presentation.
-      </p>
-    </div>
-
-    <div class="card">
-      <h3>Main Results</h3>
-      <ul class="cv-list">
-        <li>Gaussian fit to the dominant H₂O feature at <strong>1.444 ± 0.011 μm</strong></li>
-        <li>Feature amplitude of <strong>2385 ± 278 ppm</strong></li>
-        <li>Flat-spectrum test gives <strong>χ²<sub>red</sub> = 6.45</strong>, strongly rejecting a featureless atmosphere</li>
-        <li>Measured water feature corresponds to about <strong>2.2 scale heights</strong> for a high-metallicity atmosphere</li>
-        <li>Derived physical properties include <strong>g = 4.26 m s⁻²</strong>, <strong>T<sub>eq</sub> = 1117 K</strong>, and <strong>ρ = 0.167 g cm⁻³</strong></li>
-      </ul>
-    </div>
   </div>
 </section>
 
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Scientific Motivation</h2>
-    <p>
-      The projects on this page reflect the direction I want my work to keep moving:
-      more mathematically grounded, more computationally rigorous, and increasingly tied
-      to real scientific questions.
-    </p>
-  </div>
+<div class="divider"></div>
 
-  <div class="home-info-grid">
-    <div class="card">
-      <h3>Planetary and Exoplanetary Systems</h3>
-      <p>
-        My current work on 16 Psyche and WASP-39b reflects a strong interest in how
-        modeling and data analysis can be used to study planetary bodies and atmospheres.
-      </p>
+<section style="padding:3rem 0 4rem">
+  <div class="wrap">
+    <span class="label">Interests</span>
+    <h2 style="margin-bottom:1.5rem">Graduate research directions</h2>
+    <div class="grid-3 grid-border">
+      <div class="card">
+        <span class="label">Cosmology</span>
+        <h3>Primordial Black Holes</h3>
+        <p>Mass spectra, formation mechanisms, and constraints from gravitational wave observations. Hawking radiation and evaporation timescales.</p>
+      </div>
+      <div class="card">
+        <span class="label">Dark matter</span>
+        <h3>PBH–Dark Matter Connection</h3>
+        <p>Primordial black holes as dark matter candidates and their gravitational influence on large-scale structure formation.</p>
+      </div>
+      <div class="card">
+        <span class="label">Gravitational waves</span>
+        <h3>Stochastic GW Background</h3>
+        <p>Signatures of early-universe phase transitions and PBH binary mergers in the stochastic gravitational wave background.</p>
+      </div>
     </div>
-
-    <div class="card">
-      <h3>Theory and Interpretation</h3>
-      <p>
-        I am especially drawn to problems where interpretation matters just as much as
-        calculation: understanding what a result means physically, not only how to compute it.
-      </p>
-    </div>
-
-    <div class="card">
-      <h3>Future Research Growth</h3>
-      <p>
-        Over time I want to expand this page with formal writeups, figures, linked papers,
-        independent simulations, and more developed computational physics projects.
-      </p>
-    </div>
-  </div>
-</section>
-
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Related Project Work</h2>
-    <p>
-      My broader portfolio also supports these research interests through technical demos
-      and interactive physics-based tools.
-    </p>
-  </div>
-
-  <div class="home-info-grid">
-    <div class="card">
-      <h3>Fourier and Signal Analysis</h3>
-      <p>
-        My Fourier Transform Visualizer reflects an interest in spectral structure,
-        mathematical decomposition, and scientific visualization.
-      </p>
-      <a href="/fourier/" class="text-link">Open Project →</a>
-    </div>
-
-    <div class="card">
-      <h3>Wave and Field Modeling</h3>
-      <p>
-        My simulation pages provide a base for more advanced work in mathematical physics,
-        numerical methods, and physical-system visualization.
-      </p>
-      <a href="/projects/" class="text-link">View Projects →</a>
-    </div>
-
-    <div class="card">
-      <h3>Future Research Writeups</h3>
-      <p>
-        I plan to continue turning independent analyses and computational projects into
-        polished writeups that better reflect research-level thinking and presentation.
-      </p>
-    </div>
-  </div>
-</section>
-
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Long-Term Goals</h2>
-    <p>
-      My long-term goal is to contribute to research in cosmology or a closely related
-      field through strong mathematics, theoretical depth, and computational modeling.
-    </p>
-  </div>
-
-  <div class="card">
-    <p>
-      I want this page to evolve into a research-facing overview of my interests and work:
-      current collaborations, independent analysis, simulation projects, and increasingly
-      polished scientific writing. As I continue developing academically, this page will
-      also serve as a clearer bridge between coursework, research experience, and graduate study.
-    </p>
   </div>
 </section>

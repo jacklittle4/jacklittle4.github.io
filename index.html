@@ -2,92 +2,159 @@
 layout: default
 title: Home
 permalink: /
+description: Jack Little — Engineering Physics student, computational physicist, and interactive simulation builder.
 ---
 
-<section class="home-hero">
-  <div class="home-hero-inner">
-    <p class="home-kicker">Engineering Physics • Computational Projects • Research</p>
-    <h1>Jack Little</h1>
-    <p class="home-subtitle">
-      Physics, computation, and interactive visualizations. This site collects my
-      projects, simulations, research interests, and coursework in one place.
-    </p>
+<!-- HERO -->
+<section class="hero">
+  <svg class="hero-stars" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8%"  cy="14%" r="1"   fill="rgba(200,184,255,0.6)"/>
+    <circle cx="22%" cy="7%"  r="0.7" fill="rgba(255,255,255,0.4)"/>
+    <circle cx="51%" cy="10%" r="1.2" fill="rgba(126,232,200,0.5)"/>
+    <circle cx="70%" cy="19%" r="0.6" fill="rgba(255,255,255,0.35)"/>
+    <circle cx="87%" cy="8%"  r="1"   fill="rgba(200,184,255,0.45)"/>
+    <circle cx="93%" cy="32%" r="0.7" fill="rgba(126,232,200,0.3)"/>
+    <circle cx="5%"  cy="52%" r="0.8" fill="rgba(200,184,255,0.3)"/>
+    <circle cx="16%" cy="75%" r="1"   fill="rgba(255,255,255,0.2)"/>
+    <circle cx="78%" cy="78%" r="0.7" fill="rgba(126,232,200,0.35)"/>
+    <circle cx="44%" cy="86%" r="1"   fill="rgba(255,255,255,0.25)"/>
+    <circle cx="62%" cy="68%" r="0.5" fill="rgba(200,184,255,0.3)"/>
+    <circle cx="36%" cy="42%" r="0.5" fill="rgba(255,255,255,0.15)"/>
+  </svg>
 
-    <div class="home-actions">
-      <a href="/projects/" class="btn-accent">View Projects</a>
-      <a href="/about/" class="btn">About Me</a>
+  <div class="hero-orbit" style="width:520px;height:520px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+  <div class="hero-orbit" style="width:820px;height:820px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+
+  <span class="label hero-eyebrow">Engineering Physics · Computation · Cosmology</span>
+
+  <h1>Jack Little</h1>
+
+  <p class="hero-sub">
+    Physics, mathematics, and interactive simulation —
+    from spectral analysis to gravitational dynamics.
+  </p>
+
+  <div class="hero-actions">
+    <a href="/projects/" class="btn btn--accent">View Projects</a>
+    <a href="/research/" class="btn">Research</a>
+  </div>
+
+  <div class="hero-scroll" aria-hidden="true">
+    <div class="hero-scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- FEATURED PROJECTS -->
+<section>
+  <div class="wrap">
+    <span class="label">Featured work</span>
+    <h2 style="margin-bottom:0.5rem">Interactive simulations</h2>
+    <p style="max-width:480px;margin-bottom:2.5rem">Physics and mathematics made tangible — tools built to explore, not just display.</p>
+
+    <div class="grid-2 grid-border" style="margin-bottom:1px">
+      <a href="/sims/fourier/" class="project-card">
+        <span class="badge badge--done">Complete</span>
+        <span class="label">Signal analysis</span>
+        <h3>Fourier Transform Visualizer</h3>
+        <p>Upload audio and decompose it into its frequency components. Explore the mathematical structure of sound through interactive spectral plots.</p>
+        <div class="project-tags">
+          <span class="tag">FFT</span>
+          <span class="tag">Web Audio API</span>
+          <span class="tag">JavaScript</span>
+        </div>
+      </a>
+
+      <a href="/sims/blackhole/" class="project-card">
+        <span class="badge badge--wip">In progress</span>
+        <span class="label">General relativity</span>
+        <h3>Black Hole Geodesic Simulator</h3>
+        <p>Visualize the geodesic paths of photons and massive particles around a Schwarzschild black hole. Real numerical integration, rendered in real time.</p>
+        <div class="project-tags">
+          <span class="tag">Geodesics</span>
+          <span class="tag">Canvas</span>
+          <span class="tag">Runge-Kutta</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="grid-3 grid-border">
+      <a href="/sims/wave/" class="project-card">
+        <span class="badge badge--wip">In progress</span>
+        <span class="label">Wave mechanics</span>
+        <h3>Wave Interference</h3>
+        <p>Real-time simulation of superposition and interference from multiple point sources.</p>
+        <div class="project-tags"><span class="tag">Canvas</span><span class="tag">Waves</span></div>
+      </a>
+
+      <a href="/sims/field/" class="project-card">
+        <span class="badge badge--wip">In progress</span>
+        <span class="label">Electromagnetism</span>
+        <h3>Magnetic Field Explorer</h3>
+        <p>Vector field visualization around current-carrying conductors.</p>
+        <div class="project-tags"><span class="tag">Vectors</span><span class="tag">EM</span></div>
+      </a>
+
+      <a href="/sims/nbody/" class="project-card">
+        <span class="badge badge--planned">Planned</span>
+        <span class="label">Gravitational dynamics</span>
+        <h3>N-Body Simulation</h3>
+        <p>Gravitational many-body problem — adaptive timestep, Barnes-Hut tree.</p>
+        <div class="project-tags"><span class="tag">Gravity</span><span class="tag">Numerical</span></div>
+      </a>
     </div>
   </div>
 </section>
 
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Featured Projects</h2>
-    <p>Interactive tools and simulations built around physics and mathematics.</p>
-  </div>
+<div class="divider"></div>
 
-  <div class="home-project-grid">
-    <a href="/fourier/" class="project-card">
-      <h3>Fourier Transform Visualizer</h3>
-      <p>
-        Upload audio and explore its frequency spectrum with interactive plots and
-        mathematical context.
-      </p>
-      <span class="project-link-text">Open Project →</span>
-    </a>
+<!-- RESEARCH SNAPSHOT -->
+<section>
+  <div class="wrap">
+    <span class="label">Research</span>
+    <h2 style="margin-bottom:2rem">Current work</h2>
 
-    <a href="/wave/" class="project-card">
-      <h3>Wave Interference Simulation</h3>
-      <p>
-        Visualize superposition, interference patterns, and wave behavior through a
-        real-time simulation.
-      </p>
-      <span class="project-link-text">Open Project →</span>
-    </a>
-
-    <a href="/field/" class="project-card">
-      <h3>Magnetic Field Plotter</h3>
-      <p>
-        Explore the magnetic field around a current-carrying wire with vector-based
-        visualization.
-      </p>
-      <span class="project-link-text">Open Project →</span>
-    </a>
+    <div class="grid-2 grid-border" style="margin-bottom: 0">
+      <div class="card">
+        <span class="label">Planetary science · Active</span>
+        <h3>16 Psyche Topological Mapping</h3>
+        <p>Research with Dr. Shepard. Modeling the topological surface map of asteroid 16 Psyche onto its 3D shape model through computational spatial reasoning.</p>
+      </div>
+      <div class="card">
+        <span class="label">Exoplanet atmospheres · Completed</span>
+        <h3>WASP-39b Transmission Spectrum</h3>
+        <p>Independent Python analysis of the HST/WFC3 NIR transmission spectrum. Reproduced the dominant H₂O absorption feature and derived atmospheric scale heights.</p>
+        <a href="/research/" style="display:inline-block;margin-top:1rem;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2)">Full results →</a>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="home-block">
-  <div class="home-heading">
-    <h2>Explore More</h2>
-    <p>Other parts of the site that support the project work.</p>
-  </div>
+<div class="divider"></div>
 
-  <div class="home-info-grid">
-    <div class="card">
-      <h3>Research</h3>
-      <p>
-        My interests include astrophysics, cosmology, quantum systems, and computational
-        physics, with a focus on building strong theoretical and numerical foundations.
-      </p>
-      <a href="/research/" class="text-link">Go to Research →</a>
+<!-- ABOUT STRIP -->
+<section style="padding: 4rem 0;">
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:3rem;flex-wrap:wrap">
+    <div style="max-width:520px">
+      <span class="label">About</span>
+      <h2 style="margin-bottom:1rem">Engineering Physics,<br><em>year three</em></h2>
+      <p>Commonwealth University of Pennsylvania, Bloomsburg. Minor in Mathematics. Working toward graduate study in cosmology — primordial black holes, dark matter, gravitational waves.</p>
+      <p>I build computational tools and interactive simulations to make physics tangible. Everything on this site is written from scratch.</p>
+      <a href="/about/" class="btn" style="margin-top:1rem">More about me</a>
     </div>
-
-    <div class="card">
-      <h3>CV</h3>
-      <p>
-        A record of coursework in physics, mathematics, electronics, and related areas
-        that support my long-term research goals.
-      </p>
-      <a href="/cv/" class="text-link">Go to CV →</a>
-    </div>
-
-    <div class="card">
-      <h3>About Me</h3>
-      <p>
-        I am an engineering physics student interested in using computation and theory
-        to study physical systems and eventually pursue graduate research.
-      </p>
-      <a href="/about/" class="text-link">Learn More →</a>
+    <div style="display:flex;gap:3rem;flex-wrap:wrap">
+      <div style="border-left:1px solid var(--rim);padding-left:1.25rem">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--accent)">2</div>
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:0.1rem">Active research<br>projects</div>
+      </div>
+      <div style="border-left:1px solid var(--rim);padding-left:1.25rem">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--accent)">5+</div>
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:0.1rem">Simulations<br>built</div>
+      </div>
+      <div style="border-left:1px solid var(--rim);padding-left:1.25rem">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--accent)">'27</div>
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:0.1rem">Expected<br>graduation</div>
+      </div>
     </div>
   </div>
 </section>

@@ -1,0 +1,15 @@
+title: Jack Little
+description: Engineering Physics student, computational physicist, and interactive simulation builder.
+url: "https://jacklittle4.github.io"
+baseurl: ""
+
+permalink: pretty
+
+plugins:
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - .git

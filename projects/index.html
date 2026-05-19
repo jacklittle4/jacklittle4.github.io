@@ -2,42 +2,98 @@
 layout: default
 title: Projects
 permalink: /projects/
+description: Interactive physics and mathematics simulations built from scratch by Jack Little.
 ---
 
 <section class="page-hero">
-  <p class="eyebrow">Projects</p>
-  <h1>Physics and Computational Work</h1>
-  <p class="page-intro">
-    A growing collection of interactive simulations, visualization tools, and computational physics projects.
-  </p>
+  <div class="wrap">
+    <span class="label">All work</span>
+    <h1>Projects &amp; <em>Simulations</em></h1>
+    <p>Physics and mathematics translated into interactive tools. Built with vanilla JavaScript, Canvas, and WebGL — no libraries, no shortcuts.</p>
+  </div>
 </section>
 
-<section class="projects">
-  <a href="{{ '/fourier/' | relative_url }}" class="project-link">
-    <div class="project-card">
-      <h2>Fourier Transform Visualizer</h2>
-      <p>Analyze uploaded audio and inspect its frequency content through Fourier methods.</p>
-    </div>
-  </a>
+<section>
+  <div class="wrap">
+    <span class="label">Interactive simulations</span>
+    <h2 style="margin-bottom:2rem">Simulations</h2>
 
-  <a href="{{ '/wave/' | relative_url }}" class="project-link">
-    <div class="project-card">
-      <h2>Wave Interference Simulation</h2>
-      <p>Interactive visualization of interference from multiple wave sources.</p>
+    <div class="grid-2 grid-border" style="margin-bottom:1px">
+      <a href="/sims/fourier/" class="project-card">
+        <span class="badge badge--done">Complete</span>
+        <span class="label">Signal processing</span>
+        <h3>Fourier Transform Visualizer</h3>
+        <p>Upload any audio file and decompose it into its spectral components using the Fast Fourier Transform. Displays frequency-domain amplitude, phase, and allows windowing function selection.</p>
+        <div class="project-tags">
+          <span class="tag">FFT</span><span class="tag">Web Audio API</span><span class="tag">Canvas</span><span class="tag">Signal Analysis</span>
+        </div>
+      </a>
+      <a href="/sims/blackhole/" class="project-card">
+        <span class="badge badge--wip">In progress</span>
+        <span class="label">General relativity</span>
+        <h3>Black Hole Geodesic Simulator</h3>
+        <p>Numerical integration of geodesic equations around a Schwarzschild black hole. Traces photon and massive particle paths through curved spacetime using a 4th-order Runge-Kutta integrator.</p>
+        <div class="project-tags">
+          <span class="tag">Geodesics</span><span class="tag">Runge-Kutta</span><span class="tag">GR</span><span class="tag">Canvas</span>
+        </div>
+      </a>
     </div>
-  </a>
 
-  <a href="{{ '/field/' | relative_url }}" class="project-link">
-    <div class="project-card">
-      <h2>Magnetic Field Explorer</h2>
-      <p>Magnetic field visualization built around core electromagnetism ideas and geometric intuition.</p>
+    <div class="grid-3 grid-border" style="margin-bottom:1px">
+      <a href="/sims/wave/" class="project-card">
+        <span class="badge badge--wip">In progress</span>
+        <span class="label">Wave mechanics</span>
+        <h3>Wave Interference Simulator</h3>
+        <p>Superposition of waves from multiple configurable point sources. Visualises constructive and destructive interference patterns in real time.</p>
+        <div class="project-tags"><span class="tag">Superposition</span><span class="tag">Canvas</span><span class="tag">Waves</span></div>
+      </a>
+      <a href="/sims/field/" class="project-card">
+        <span class="badge badge--wip">In progress</span>
+        <span class="label">Electromagnetism</span>
+        <h3>Magnetic Field Explorer</h3>
+        <p>Vector field visualisation around arbitrary current-carrying wire configurations using the Biot-Savart law.</p>
+        <div class="project-tags"><span class="tag">Biot-Savart</span><span class="tag">Vector Fields</span><span class="tag">EM</span></div>
+      </a>
+      <a href="/sims/nbody/" class="project-card">
+        <span class="badge badge--planned">Planned</span>
+        <span class="label">Gravitational dynamics</span>
+        <h3>N-Body Simulation</h3>
+        <p>Gravitational many-body problem with adaptive timestep integration and optional Barnes-Hut tree approximation.</p>
+        <div class="project-tags"><span class="tag">Gravity</span><span class="tag">Barnes-Hut</span><span class="tag">Adaptive RK</span></div>
+      </a>
     </div>
-  </a>
 
-  <a href="{{ '/blackhole_antiparticles/' | relative_url }}" class="project-link">
-    <div class="project-card">
-      <h2>Black Hole Project</h2>
-      <p>Physics-focused work related to black holes, radiation, and theoretical ideas in gravitation.</p>
+    <div class="grid-3 grid-border">
+      <a href="/sims/numerical/" class="project-card">
+        <span class="badge badge--planned">Planned</span>
+        <span class="label">Numerical methods</span>
+        <h3>Numerical Methods Explorer</h3>
+        <p>Step-through visualisation of ODE solvers: Euler, RK2, RK4, Adams-Bashforth. Compare accuracy and stability interactively.</p>
+        <div class="project-tags"><span class="tag">ODE</span><span class="tag">RK4</span><span class="tag">Euler</span></div>
+      </a>
+      <div class="project-card" style="pointer-events:none;opacity:0.45">
+        <span class="badge badge--planned">Planned</span>
+        <span class="label">Quantum mechanics</span>
+        <h3>Quantum Tunnelling</h3>
+        <p>Time-dependent Schrödinger equation — wavepacket propagation through potential barriers.</p>
+        <div class="project-tags"><span class="tag">TDSE</span><span class="tag">QM</span></div>
+      </div>
+      <div class="project-card" style="pointer-events:none;opacity:0.45">
+        <span class="badge badge--planned">Planned</span>
+        <span class="label">Cosmology</span>
+        <h3>Primordial Black Hole Mass Spectrum</h3>
+        <p>Interactive visualisation of PBH mass distributions under different inflationary power spectra.</p>
+        <div class="project-tags"><span class="tag">PBH</span><span class="tag">Cosmology</span></div>
+      </div>
     </div>
-  </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section style="padding:3rem 0 4rem">
+  <div class="wrap--narrow">
+    <span class="label">Note</span>
+    <p style="font-size:0.82rem">All simulations are written from scratch in vanilla JavaScript. Source code is on <a href="https://github.com/jacklittle4" target="_blank" rel="noopener">GitHub</a>. Simulations marked <span style="color:var(--gold)">In progress</span> are functional but still developing.</p>
+  </div>
 </section>

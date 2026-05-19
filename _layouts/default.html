@@ -1,8 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  {% include head.html %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ page.description | default: 'Jack Little — Engineering Physics, computational simulations, and research.' }}">
+  <meta name="theme-color" content="#07080f">
   <title>{{ page.title }} — Jack Little</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/style.css">
+  {% if page.extra_css %}
+  <link rel="stylesheet" href="{{ page.extra_css }}">
+  {% endif %}
 </head>
 <body>
 
@@ -14,7 +23,9 @@
 
   {% include footer.html %}
 
-  <script src="/js/main.js"></script>
-  {% include theme-script.html %}
+  {% if page.extra_js %}
+  <script src="{{ page.extra_js }}" defer></script>
+  {% endif %}
+
 </body>
 </html>
