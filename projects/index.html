@@ -19,7 +19,7 @@ description: Interactive physics and mathematics simulations built by Jack Littl
       </p>
     </div>
     <aside class="hero-aside">
-      <p>Updated pages: black hole, Fourier, N-body, and numerical methods.</p>
+      <p>Updated pages: black hole, Fourier, N-body, numerical methods, waves, magnetic fields, and tunneling.</p>
     </aside>
   </div>
 </section>
@@ -106,12 +106,31 @@ description: Interactive physics and mathematics simulations built by Jack Littl
         </div>
       </a>
 
-      <a href="{{ '/sims/wave/' | relative_url }}" class="project-card project-card--quiet">
+      <a href="{{ '/sims/tunneling/' | relative_url }}" class="project-card">
         <div>
-          <span class="badge badge--wip">Preview</span>
+          <span class="badge badge--done">New</span>
+          <span class="label">Quantum mechanics</span>
+          <h3>Quantum Tunneling Lab</h3>
+          <p>Finite square-barrier model with animated wavefunction, draggable energy and barrier controls, and live T/R estimates.</p>
+        </div>
+        <div class="project-visual">
+          <span class="mini-tunnel">
+            <span style="--y:-10;--r:6"></span><span style="--y:7;--r:-5"></span>
+          </span>
+        </div>
+        <div class="project-tags">
+          <span class="tag">Transmission</span>
+          <span class="tag">Reflection</span>
+          <span class="tag">Quantum</span>
+        </div>
+      </a>
+
+      <a href="{{ '/sims/wave/' | relative_url }}" class="project-card">
+        <div>
+          <span class="badge badge--done">New</span>
           <span class="label">Wave mechanics</span>
           <h3>Wave Interference Simulator</h3>
-          <p>Visual shell for a point-source superposition simulator, styled to match the finished labs.</p>
+          <p>Point-source superposition with draggable sources, wavelength, frequency, damping, and contrast controls.</p>
         </div>
         <div class="project-visual"><span class="mini-wave"><span></span><span></span></span></div>
         <div class="project-tags">
@@ -120,12 +139,12 @@ description: Interactive physics and mathematics simulations built by Jack Littl
         </div>
       </a>
 
-      <a href="{{ '/sims/field/' | relative_url }}" class="project-card project-card--quiet">
+      <a href="{{ '/sims/field/' | relative_url }}" class="project-card">
         <div>
-          <span class="badge badge--wip">Preview</span>
+          <span class="badge badge--done">New</span>
           <span class="label">Electromagnetism</span>
           <h3>Magnetic Field Explorer</h3>
-          <p>Visual shell for Biot-Savart vector fields and conductor arrangements.</p>
+          <p>Interactive current-carrying wires with field vectors, heat magnitude, and Biot-Savart field-line tracing.</p>
         </div>
         <div class="project-visual">
           <span class="mini-field">
@@ -139,6 +158,54 @@ description: Interactive physics and mathematics simulations built by Jack Littl
           <span class="tag">Fields</span>
         </div>
       </a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-header">
+      <div>
+        <span class="eyebrow">Future queue</span>
+        <h2>Potential next builds.</h2>
+      </div>
+      <p>
+        These are natural extensions of the current portfolio: deeper physics,
+        stronger numerical models, and clearer visual experiments.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <article class="card">
+        <span class="label">Cosmology</span>
+        <h3>Primordial Black Hole Spectrum</h3>
+        <p>Interactive mass-distribution curves, evaporation timescales, and dark-matter constraint overlays.</p>
+      </article>
+      <article class="card">
+        <span class="label">General relativity</span>
+        <h3>Kerr Ray-Tracing Preview</h3>
+        <p>Spin-dependent photon paths around a rotating black hole with frame-dragging controls.</p>
+      </article>
+      <article class="card">
+        <span class="label">Quantum mechanics</span>
+        <h3>Wave Packet Evolution</h3>
+        <p>Time-dependent Gaussian packets scattering, spreading, and tunneling through adjustable potentials.</p>
+      </article>
+      <article class="card">
+        <span class="label">Astrophysics</span>
+        <h3>Resonant Orbit Explorer</h3>
+        <p>Mean-motion resonances, orbital phase maps, and stability islands for compact multi-body systems.</p>
+      </article>
+      <article class="card">
+        <span class="label">Electromagnetism</span>
+        <h3>Charged Particle Tracer</h3>
+        <p>Lorentz-force motion through electric and magnetic fields with live velocity and curvature readouts.</p>
+      </article>
+      <article class="card">
+        <span class="label">Numerics</span>
+        <h3>Integrator Stability Bench</h3>
+        <p>Side-by-side explicit, symplectic, and adaptive methods tested against the same initial conditions.</p>
+      </article>
     </div>
   </div>
 </section>

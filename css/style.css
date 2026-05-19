@@ -105,6 +105,16 @@ select {
   font: inherit;
 }
 
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background: #121820;
+  color: #eef4f2;
+}
+
 button {
   color: inherit;
 }
@@ -145,17 +155,19 @@ h4 {
   margin: 0;
   color: var(--text);
   font-family: var(--font-display);
-  line-height: 1.02;
+  font-weight: 700;
+  line-height: 1.04;
   letter-spacing: 0;
+  text-wrap: balance;
 }
 
 h1 {
-  font-size: 6.75rem;
+  font-size: 6.1rem;
   max-width: 11ch;
 }
 
 h2 {
-  font-size: 3.75rem;
+  font-size: 3.35rem;
   max-width: 13ch;
 }
 
@@ -474,7 +486,7 @@ sup {
 }
 
 .home-hero {
-  min-height: calc(100vh - 4.1rem);
+  min-height: calc(94vh - 4.1rem);
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
   gap: clamp(2rem, 6vw, 6rem);
@@ -493,7 +505,7 @@ sup {
 
 .hero-copy p {
   max-width: 650px;
-  font-size: 1.18rem;
+  font-size: 1.12rem;
 }
 
 .hero-actions,
@@ -654,7 +666,7 @@ sup {
 }
 
 .page-hero {
-  padding: clamp(4.5rem, 9vw, 7rem) 0 clamp(3rem, 6vw, 5rem);
+  padding: clamp(4.1rem, 8vw, 6.2rem) 0 clamp(2.8rem, 5vw, 4.3rem);
   border-bottom: 1px solid var(--line);
 }
 
@@ -810,7 +822,8 @@ sup {
 .mini-orbit,
 .mini-method,
 .mini-wave,
-.mini-field {
+.mini-field,
+.mini-tunnel {
   position: absolute;
   inset: 0;
 }
@@ -927,6 +940,48 @@ sup {
   transform: rotate(calc(var(--r) * 1deg));
 }
 
+.mini-tunnel::before {
+  content: "";
+  position: absolute;
+  left: 46%;
+  top: 18%;
+  width: 15%;
+  height: 64%;
+  border: 1px solid rgba(244, 189, 100, 0.44);
+  background: linear-gradient(to bottom, rgba(244, 189, 100, 0.22), rgba(255, 125, 144, 0.08));
+  box-shadow: 0 0 26px rgba(244, 189, 100, 0.12);
+}
+
+.mini-tunnel::after {
+  content: "";
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 58%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--mint), var(--amber));
+  box-shadow: 0 0 20px rgba(110, 231, 240, 0.34);
+}
+
+.mini-tunnel span {
+  position: absolute;
+  left: 8%;
+  top: calc(52% + var(--y) * 1%);
+  width: 25%;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(110, 231, 240, 0.7);
+  transform: rotate(calc(var(--r) * 1deg));
+  animation: tunnelPulse 2.2s ease-in-out infinite alternate;
+}
+
+.mini-tunnel span:nth-child(2) {
+  left: 62%;
+  width: 25%;
+  background: rgba(140, 245, 189, 0.66);
+  animation-delay: 0.35s;
+}
+
 .band {
   border-block: 1px solid var(--line);
   background: rgba(18, 24, 32, 0.58);
@@ -1033,9 +1088,18 @@ sup {
 }
 
 .orbit-panel {
-  position: sticky;
-  top: 6rem;
+  position: relative;
+  top: auto;
+  overflow: hidden;
   padding: 1.25rem;
+}
+
+.about-layout .hero-visual {
+  min-height: 320px;
+}
+
+.about-layout .gravity-well {
+  width: min(100%, 300px);
 }
 
 .current-panel {
@@ -1197,6 +1261,7 @@ sup {
   width: 100%;
   height: 100%;
   min-height: inherit;
+  cursor: crosshair;
 }
 
 .sim-overlay {
@@ -1271,9 +1336,17 @@ sup {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   outline: none;
-  background: rgba(255, 255, 255, 0.045);
+  background: rgba(18, 24, 32, 0.96);
   color: var(--text);
   padding: 0.5rem 0.65rem;
+}
+
+.control-group select:focus,
+.control-group input[type="number"]:focus,
+.control-group input[type="text"]:focus,
+.input-like:focus {
+  border-color: rgba(140, 245, 189, 0.72);
+  box-shadow: 0 0 0 3px rgba(140, 245, 189, 0.08);
 }
 
 .control-split {
@@ -1502,6 +1575,13 @@ sup {
   }
 }
 
+@keyframes tunnelPulse {
+  to {
+    transform: translateX(16px) rotate(calc(var(--r) * 1deg));
+    opacity: 0.45;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1519,11 +1599,11 @@ sup {
 
 @media (max-width: 980px) {
   h1 {
-    font-size: 5.4rem;
+    font-size: 4.9rem;
   }
 
   h2 {
-    font-size: 3rem;
+    font-size: 2.85rem;
   }
 
   .home-hero,
@@ -1561,11 +1641,11 @@ sup {
 
 @media (max-width: 760px) {
   h1 {
-    font-size: 4.15rem;
+    font-size: 3.75rem;
   }
 
   h2 {
-    font-size: 2.45rem;
+    font-size: 2.3rem;
   }
 
   .hero-copy p,
@@ -1635,11 +1715,11 @@ sup {
 
 @media (max-width: 520px) {
   h1 {
-    font-size: 3.15rem;
+    font-size: 2.85rem;
   }
 
   h2 {
-    font-size: 2rem;
+    font-size: 1.9rem;
   }
 
   h3 {

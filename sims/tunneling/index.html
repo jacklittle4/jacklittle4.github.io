@@ -1,0 +1,471 @@
+---
+layout: default
+title: Quantum Tunneling Lab
+permalink: /sims/tunneling/
+description: Interactive finite square barrier quantum tunneling visualization with transmission and reflection estimates.
+---
+
+<section class="page-hero">
+  <div class="wrap">
+    <div>
+      <div class="hero-kicker">
+        <span class="badge badge--done">New</span>
+        <span class="label">Quantum mechanics</span>
+      </div>
+      <h1>Quantum Tunneling Lab.</h1>
+      <p>
+        Tune particle energy, barrier height, width, and mass to see how a finite
+        square barrier changes transmission, reflection, and the wavefunction shape.
+      </p>
+    </div>
+    <aside class="hero-aside">
+      <p>Finite barrier model with hbar = 1 and live analytic transmission estimates.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="sim-shell">
+      <div class="sim-stage">
+        <canvas id="tunnelCanvas" class="sim-canvas"></canvas>
+        <div class="sim-overlay">
+          <div class="button-row" style="margin:0">
+            <button class="btn btn--small" id="tunnelPause" type="button">Pause</button>
+            <button class="btn btn--small" id="tunnelReset" type="button">Reset</button>
+          </div>
+          <span class="sim-readout" id="tunnelReadout">Evanescent inside barrier</span>
+        </div>
+      </div>
+
+      <aside class="sim-controls" aria-label="Quantum tunneling controls">
+        <div class="control-group">
+          <label for="tunnelPreset">Preset</label>
+          <select id="tunnelPreset">
+            <option value="sub" selected>Sub-barrier tunneling</option>
+            <option value="resonance">Near resonance</option>
+            <option value="above">Above barrier</option>
+            <option value="heavy">Heavy particle</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="tunnelEnergy">Particle energy <span id="tunnelEnergyVal">0.90</span></label>
+          <input type="range" id="tunnelEnergy" min="0.2" max="5.0" step="0.02" value="0.90">
+        </div>
+
+        <div class="control-group">
+          <label for="tunnelBarrier">Barrier height <span id="tunnelBarrierVal">2.20</span></label>
+          <input type="range" id="tunnelBarrier" min="0.2" max="5.0" step="0.02" value="2.20">
+        </div>
+
+        <div class="control-group">
+          <label for="tunnelWidth">Barrier width <span id="tunnelWidthVal">1.25</span></label>
+          <input type="range" id="tunnelWidth" min="0.25" max="3.0" step="0.01" value="1.25">
+        </div>
+
+        <div class="control-group">
+          <label for="tunnelMass">Mass scale <span id="tunnelMassVal">1.00</span></label>
+          <input type="range" id="tunnelMass" min="0.45" max="3.2" step="0.01" value="1.00">
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="sim-stat-val" id="tunnelStatT">0%</div>
+            <div class="sim-stat-label">Transmission</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="tunnelStatR">0%</div>
+            <div class="sim-stat-label">Reflection</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="tunnelStatK">0.00</div>
+            <div class="sim-stat-label">Outside k</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="tunnelStatInside">0.00</div>
+            <div class="sim-stat-label">Inside scale</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <p class="hint" style="margin-top:1rem">Drag the energy line, barrier top, or barrier edge directly on the canvas.</p>
+  </div>
+</section>
+
+<section class="section band">
+  <div class="wrap">
+    <div class="grid-2">
+      <article class="card">
+        <span class="label">Barrier physics</span>
+        <h3>Classically forbidden can still transmit</h3>
+        <p>
+          When E is below V0, the wavefunction decays inside the barrier but does not
+          instantly vanish. A thinner or lower barrier raises the transmission probability.
+        </p>
+      </article>
+      <article class="card">
+        <span class="label">Wave behavior</span>
+        <h3>Above the barrier is not always perfect</h3>
+        <p>
+          Even when E exceeds V0, boundary matching can still produce reflection.
+          The width control makes the oscillatory transmission windows visible.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const canvas = document.getElementById('tunnelCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  const ui = {
+    preset: document.getElementById('tunnelPreset'),
+    energy: document.getElementById('tunnelEnergy'),
+    barrier: document.getElementById('tunnelBarrier'),
+    width: document.getElementById('tunnelWidth'),
+    mass: document.getElementById('tunnelMass'),
+    pause: document.getElementById('tunnelPause'),
+    reset: document.getElementById('tunnelReset'),
+    readout: document.getElementById('tunnelReadout'),
+    energyVal: document.getElementById('tunnelEnergyVal'),
+    barrierVal: document.getElementById('tunnelBarrierVal'),
+    widthVal: document.getElementById('tunnelWidthVal'),
+    massVal: document.getElementById('tunnelMassVal'),
+    statT: document.getElementById('tunnelStatT'),
+    statR: document.getElementById('tunnelStatR'),
+    statK: document.getElementById('tunnelStatK'),
+    statInside: document.getElementById('tunnelStatInside')
+  };
+
+  const presets = {
+    sub: { energy: 0.9, barrier: 2.2, width: 1.25, mass: 1 },
+    resonance: { energy: 1.8, barrier: 2.6, width: 2.35, mass: 0.85 },
+    above: { energy: 3.2, barrier: 1.4, width: 1.1, mass: 1 },
+    heavy: { energy: 1.35, barrier: 2.4, width: 1.65, mass: 2.25 }
+  };
+
+  const state = {
+    running: true,
+    time: 0,
+    last: performance.now(),
+    dragMode: null
+  };
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function params() {
+    return {
+      energy: parseFloat(ui.energy.value),
+      barrier: parseFloat(ui.barrier.value),
+      width: parseFloat(ui.width.value),
+      mass: parseFloat(ui.mass.value)
+    };
+  }
+
+  function solve() {
+    const p = params();
+    const energy = Math.max(p.energy, 0.001);
+    const barrier = Math.max(p.barrier, 0.001);
+    const mass = Math.max(p.mass, 0.001);
+    const outsideK = Math.sqrt(2 * mass * energy);
+    let transmission = 1;
+    let insideScale = 0;
+    let mode = 'threshold';
+
+    if (Math.abs(energy - barrier) < 0.015) {
+      transmission = 1 / (1 + (mass * barrier * p.width * p.width) / 2);
+      insideScale = 0;
+    } else if (energy < barrier) {
+      insideScale = Math.sqrt(2 * mass * (barrier - energy));
+      const s = Math.sinh(Math.min(insideScale * p.width, 12));
+      transmission = 1 / (1 + (barrier * barrier * s * s) / (4 * energy * (barrier - energy)));
+      mode = 'evanescent';
+    } else {
+      insideScale = Math.sqrt(2 * mass * (energy - barrier));
+      const s = Math.sin(insideScale * p.width);
+      transmission = 1 / (1 + (barrier * barrier * s * s) / (4 * energy * (energy - barrier)));
+      mode = 'propagating';
+    }
+
+    transmission = clamp(transmission, 0, 1);
+    return {
+      energy,
+      barrier,
+      width: p.width,
+      mass,
+      outsideK,
+      insideScale,
+      transmission,
+      reflection: 1 - transmission,
+      mode
+    };
+  }
+
+  function geometry(solution) {
+    const w = canvas.width / dpr;
+    const h = canvas.height / dpr;
+    const base = h * 0.73;
+    const top = h * 0.17;
+    const unit = (base - top) / Math.max(5.2, solution.energy + 0.5, solution.barrier + 0.55);
+    const center = w * 0.5;
+    const barrierPx = clamp(solution.width * w * 0.105, 58, w * 0.34);
+    return {
+      w,
+      h,
+      base,
+      top,
+      unit,
+      center,
+      x1: center - barrierPx / 2,
+      x2: center + barrierPx / 2,
+      barrierPx,
+      barrierTop: base - solution.barrier * unit,
+      energyY: base - solution.energy * unit
+    };
+  }
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function drawGrid(g) {
+    ctx.fillStyle = '#070a0f';
+    ctx.fillRect(0, 0, g.w, g.h);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.045)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < g.w; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, g.h);
+      ctx.stroke();
+    }
+    for (let y = 0; y < g.h; y += 32) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(g.w, y);
+      ctx.stroke();
+    }
+  }
+
+  function drawPotential(g, s) {
+    ctx.fillStyle = 'rgba(244, 189, 100, 0.16)';
+    ctx.strokeStyle = 'rgba(244, 189, 100, 0.78)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.rect(g.x1, g.barrierTop, g.x2 - g.x1, g.base - g.barrierTop);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.setLineDash([7, 7]);
+    ctx.strokeStyle = 'rgba(110, 231, 240, 0.82)';
+    ctx.beginPath();
+    ctx.moveTo(0, g.energyY);
+    ctx.lineTo(g.w, g.energyY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = 'rgba(238, 244, 242, 0.18)';
+    ctx.beginPath();
+    ctx.moveTo(0, g.base);
+    ctx.lineTo(g.w, g.base);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(238, 244, 242, 0.78)';
+    ctx.font = '700 11px JetBrains Mono, monospace';
+    ctx.fillText('E', 14, g.energyY - 8);
+    ctx.fillText('V0', g.x1 + 10, g.barrierTop - 9);
+    ctx.fillText(s.mode === 'evanescent' ? 'decay region' : 'oscillatory region', g.x1 + 10, g.base + 20);
+  }
+
+  function drawWave(g, s) {
+    const amp = Math.min(54, g.h * 0.11);
+    const mid = g.h * 0.43;
+    const phase = state.time * 2.25;
+    const sqrtR = Math.sqrt(s.reflection);
+    const sqrtT = Math.sqrt(s.transmission);
+    const scaleX = g.barrierPx / s.width;
+    const points = [];
+    const envelopeTop = [];
+    const envelopeBottom = [];
+
+    for (let x = 0; x <= g.w; x += 2) {
+      const worldX = (x - g.center) / scaleX;
+      let value = 0;
+      let envelope = 1;
+      if (x < g.x1) {
+        value = Math.sin(s.outsideK * worldX - phase) + sqrtR * Math.sin(-s.outsideK * worldX - phase + 0.8);
+        envelope = 1 + sqrtR;
+      } else if (x > g.x2) {
+        value = sqrtT * Math.sin(s.outsideK * worldX - phase);
+        envelope = Math.max(0.08, sqrtT);
+      } else if (s.mode === 'evanescent') {
+        const distance = worldX + s.width / 2;
+        const decay = Math.exp(-s.insideScale * Math.max(0, distance));
+        value = 0.74 * decay * Math.sin(phase * 0.7);
+        envelope = Math.max(0.04, decay);
+      } else if (s.mode === 'threshold') {
+        const mix = 1 - (x - g.x1) / Math.max(1, g.x2 - g.x1);
+        value = 0.42 * mix * Math.sin(phase * 0.8);
+        envelope = Math.max(0.08, mix);
+      } else {
+        value = 0.72 * Math.sin(s.insideScale * worldX - phase);
+        envelope = 0.72;
+      }
+      points.push([x, mid - value * amp * 0.45]);
+      envelopeTop.push([x, mid - envelope * amp * 0.38]);
+      envelopeBottom.push([x, mid + envelope * amp * 0.38]);
+    }
+
+    ctx.beginPath();
+    envelopeTop.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    envelopeBottom.reverse().forEach((p) => ctx.lineTo(p[0], p[1]));
+    ctx.closePath();
+    const fill = ctx.createLinearGradient(0, 0, g.w, 0);
+    fill.addColorStop(0, 'rgba(110, 231, 240, 0.12)');
+    fill.addColorStop(0.5, 'rgba(244, 189, 100, 0.12)');
+    fill.addColorStop(1, 'rgba(140, 245, 189, 0.12)');
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    ctx.strokeStyle = '#8cf5bd';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(110, 231, 240, 0.92)';
+    ctx.beginPath();
+    ctx.arc(g.w * 0.16 + Math.sin(phase) * 8, mid, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function updateStats() {
+    const s = solve();
+    ui.energyVal.textContent = s.energy.toFixed(2);
+    ui.barrierVal.textContent = s.barrier.toFixed(2);
+    ui.widthVal.textContent = s.width.toFixed(2);
+    ui.massVal.textContent = s.mass.toFixed(2);
+    ui.statT.textContent = Math.round(s.transmission * 100) + '%';
+    ui.statR.textContent = Math.round(s.reflection * 100) + '%';
+    ui.statK.textContent = s.outsideK.toFixed(2);
+    ui.statInside.textContent = s.insideScale.toFixed(2);
+    ui.readout.textContent = s.mode === 'evanescent'
+      ? 'Evanescent inside barrier'
+      : s.mode === 'propagating'
+        ? 'Oscillating inside barrier'
+        : 'At the barrier threshold';
+    return s;
+  }
+
+  function draw() {
+    const s = updateStats();
+    const g = geometry(s);
+    drawGrid(g);
+    drawPotential(g, s);
+    drawWave(g, s);
+  }
+
+  function applyPreset(name) {
+    const p = presets[name] || presets.sub;
+    ui.energy.value = p.energy;
+    ui.barrier.value = p.barrier;
+    ui.width.value = p.width;
+    ui.mass.value = p.mass;
+    draw();
+  }
+
+  function pointerPosition(event) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    };
+  }
+
+  function setControl(input, value) {
+    input.value = clamp(value, parseFloat(input.min), parseFloat(input.max)).toFixed(2);
+    draw();
+  }
+
+  canvas.addEventListener('pointerdown', function (event) {
+    const s = solve();
+    const g = geometry(s);
+    const p = pointerPosition(event);
+    if (Math.abs(p.y - g.energyY) < 18) {
+      state.dragMode = 'energy';
+    } else if (Math.abs(p.x - g.x1) < 18 || Math.abs(p.x - g.x2) < 18) {
+      state.dragMode = 'width';
+    } else if (p.x > g.x1 && p.x < g.x2 && Math.abs(p.y - g.barrierTop) < 24) {
+      state.dragMode = 'barrier';
+    } else {
+      state.dragMode = null;
+    }
+    if (state.dragMode) {
+      canvas.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    }
+  });
+
+  canvas.addEventListener('pointermove', function (event) {
+    if (!state.dragMode) return;
+    const s = solve();
+    const g = geometry(s);
+    const p = pointerPosition(event);
+    if (state.dragMode === 'energy') {
+      setControl(ui.energy, (g.base - p.y) / g.unit);
+    } else if (state.dragMode === 'barrier') {
+      setControl(ui.barrier, (g.base - p.y) / g.unit);
+    } else if (state.dragMode === 'width') {
+      setControl(ui.width, (Math.abs(p.x - g.center) * 2) / (g.w * 0.105));
+    }
+  });
+
+  window.addEventListener('pointerup', function () {
+    state.dragMode = null;
+  });
+
+  ui.preset.addEventListener('change', function () {
+    applyPreset(ui.preset.value);
+  });
+
+  [ui.energy, ui.barrier, ui.width, ui.mass].forEach(function (input) {
+    input.addEventListener('input', draw);
+  });
+
+  ui.pause.addEventListener('click', function () {
+    state.running = !state.running;
+    ui.pause.textContent = state.running ? 'Pause' : 'Animate';
+  });
+
+  ui.reset.addEventListener('click', function () {
+    ui.preset.value = 'sub';
+    applyPreset('sub');
+  });
+
+  function frame(now) {
+    const dt = Math.min(40, now - state.last);
+    state.last = now;
+    if (state.running) {
+      state.time += dt / 1000;
+      draw();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  applyPreset('sub');
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>

@@ -2,50 +2,531 @@
 layout: default
 title: Magnetic Field Explorer
 permalink: /sims/field/
-description: Preview page for a Biot-Savart magnetic field visualization.
+description: Interactive Biot-Savart magnetic field visualization for current-carrying wires.
 ---
 
 <section class="page-hero">
   <div class="wrap">
     <div>
       <div class="hero-kicker">
-        <span class="badge badge--wip">Preview</span>
+        <span class="badge badge--done">New</span>
         <span class="label">Electromagnetism</span>
       </div>
       <h1>Magnetic Field Explorer.</h1>
       <p>
-        A visual shell for vector fields around current-carrying conductors using the Biot-Savart law.
-        The page now shares the same structure as the finished labs.
+        Place current-carrying wires and inspect the magnetic field. Arrows show field direction,
+        heat color shows field magnitude, and field lines trace the Biot-Savart flow.
       </p>
     </div>
     <aside class="hero-aside">
-      <p>Next build target: draggable conductors and field-line tracing.</p>
+      <p>Infinite straight-wire model: B is proportional to I / r.</p>
     </aside>
   </div>
 </section>
 
 <section class="section section--tight">
   <div class="wrap">
-    <div class="grid-2">
-      <div class="card">
-        <span class="label">Model plan</span>
-        <h3>Biot-Savart vectors</h3>
-        <p>
-          The finished version will let users place wires, reverse current direction,
-          and inspect the resulting magnetic field magnitude and direction.
-        </p>
-        <div class="button-row">
-          <a href="{{ '/projects/' | relative_url }}" class="btn">Back to projects</a>
-          <a href="{{ '/sims/nbody/' | relative_url }}" class="btn btn--accent">N-body sim</a>
+    <div class="sim-shell">
+      <div class="sim-stage">
+        <canvas id="fieldCanvas" class="sim-canvas"></canvas>
+        <div class="sim-overlay">
+          <div class="button-row" style="margin:0">
+            <button class="btn btn--small" id="fieldReset" type="button">Reset</button>
+            <button class="btn btn--small" id="fieldReverse" type="button">Reverse selected</button>
+            <button class="btn btn--small" id="fieldClear" type="button">Clear</button>
+          </div>
+          <span class="sim-readout" id="fieldReadout">Drag wires or click to add</span>
         </div>
       </div>
-      <div class="project-visual" style="min-height:320px">
-        <span class="mini-field">
-          <span style="--x:0;--y:0;--r:20"></span><span style="--x:1;--y:0;--r:50"></span><span style="--x:2;--y:0;--r:80"></span><span style="--x:3;--y:0;--r:110"></span>
-          <span style="--x:0;--y:1;--r:-20"></span><span style="--x:1;--y:1;--r:10"></span><span style="--x:2;--y:1;--r:160"></span><span style="--x:3;--y:1;--r:205"></span>
-          <span style="--x:0;--y:2;--r:-55"></span><span style="--x:1;--y:2;--r:-25"></span><span style="--x:2;--y:2;--r:210"></span><span style="--x:3;--y:2;--r:250"></span>
-        </span>
-      </div>
+
+      <aside class="sim-controls" aria-label="Magnetic field controls">
+        <div class="control-group">
+          <label for="fieldPreset">Preset</label>
+          <select id="fieldPreset">
+            <option value="pair" selected>Opposite-current pair</option>
+            <option value="same">Same-current pair</option>
+            <option value="quadrupole">Quadrupole</option>
+            <option value="array">Wire array</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="fieldCurrent">Current scale <span id="fieldCurrentVal">1.00</span></label>
+          <input type="range" id="fieldCurrent" min="0.2" max="2.4" step="0.05" value="1.00">
+        </div>
+
+        <div class="control-group">
+          <label for="fieldDensity">Vector density <span id="fieldDensityVal">16</span></label>
+          <input type="range" id="fieldDensity" min="8" max="26" step="1" value="16">
+        </div>
+
+        <div class="control-group">
+          <label for="fieldSoft">Core radius <span id="fieldSoftVal">0.18</span></label>
+          <input type="range" id="fieldSoft" min="0.06" max="0.55" step="0.01" value="0.18">
+        </div>
+
+        <div class="control-group">
+          <label for="fieldLines">Field lines <span id="fieldLinesVal">10</span></label>
+          <input type="range" id="fieldLines" min="0" max="24" step="2" value="10">
+        </div>
+
+        <div class="control-group">
+          <span class="control-label">Layers</span>
+          <div class="segmented segmented--3">
+            <button class="btn btn--small is-active" id="fieldHeat" type="button">Heat</button>
+            <button class="btn btn--small is-active" id="fieldVectors" type="button">Vectors</button>
+            <button class="btn btn--small is-active" id="fieldLineToggle" type="button">Lines</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="sim-stat-val" id="fieldStatWires">2</div>
+            <div class="sim-stat-label">Wires</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="fieldStatNet">0.0</div>
+            <div class="sim-stat-label">Net current</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="fieldStatMax">0.0</div>
+            <div class="sim-stat-label">Max field</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="fieldStatSelected">1</div>
+            <div class="sim-stat-label">Selected</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <p class="hint" style="margin-top:1rem">Click empty space to add a wire. Drag a wire to move it. Reverse selected flips current direction.</p>
+  </div>
+</section>
+
+<section class="section band">
+  <div class="wrap">
+    <div class="grid-2">
+      <article class="card">
+        <span class="label">Biot-Savart</span>
+        <h3>Direction wraps around current</h3>
+        <p>
+          For a straight wire pointing out of the screen, the magnetic field circulates by the
+          right-hand rule. Reversing current reverses the arrows and field-line direction.
+        </p>
+      </article>
+      <article class="card">
+        <span class="label">Superposition</span>
+        <h3>Fields add as vectors</h3>
+        <p>
+          Multiple wires combine by vector addition. Opposite currents form a saddle-like pattern;
+          same currents create reinforcing loops between conductors.
+        </p>
+      </article>
     </div>
   </div>
 </section>
+
+<script>
+(function () {
+  const canvas = document.getElementById('fieldCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const heatCanvas = document.createElement('canvas');
+  const heatCtx = heatCanvas.getContext('2d');
+
+  const ui = {
+    preset: document.getElementById('fieldPreset'),
+    current: document.getElementById('fieldCurrent'),
+    density: document.getElementById('fieldDensity'),
+    soft: document.getElementById('fieldSoft'),
+    lines: document.getElementById('fieldLines'),
+    currentVal: document.getElementById('fieldCurrentVal'),
+    densityVal: document.getElementById('fieldDensityVal'),
+    softVal: document.getElementById('fieldSoftVal'),
+    linesVal: document.getElementById('fieldLinesVal'),
+    heat: document.getElementById('fieldHeat'),
+    vectors: document.getElementById('fieldVectors'),
+    lineToggle: document.getElementById('fieldLineToggle'),
+    reset: document.getElementById('fieldReset'),
+    reverse: document.getElementById('fieldReverse'),
+    clear: document.getElementById('fieldClear'),
+    readout: document.getElementById('fieldReadout'),
+    statWires: document.getElementById('fieldStatWires'),
+    statNet: document.getElementById('fieldStatNet'),
+    statMax: document.getElementById('fieldStatMax'),
+    statSelected: document.getElementById('fieldStatSelected')
+  };
+
+  let width = 0;
+  let height = 0;
+  let wires = [];
+  let selected = 0;
+  let dragging = false;
+  let maxField = 0;
+  const layers = { heat: true, vectors: true, lines: true };
+  const colors = { positive: '#6ee7f0', negative: '#ff7d90', neutral: '#f4bd64' };
+
+  function params() {
+    return {
+      current: parseFloat(ui.current.value),
+      density: parseInt(ui.density.value, 10),
+      soft: parseFloat(ui.soft.value),
+      lines: parseInt(ui.lines.value, 10)
+    };
+  }
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    width = rect.width;
+    height = Math.max(rect.height, 620);
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const heatWidth = Math.min(260, Math.max(150, Math.floor(width / 4)));
+    const heatHeight = Math.max(120, Math.floor(heatWidth * height / width));
+    heatCanvas.width = heatWidth;
+    heatCanvas.height = heatHeight;
+  }
+
+  function screenFromWorld(x, y) {
+    const aspect = width / height;
+    return [
+      width * (0.5 + x / (7.2 * aspect)),
+      height * (0.5 - y / 7.2)
+    ];
+  }
+
+  function worldFromScreen(px, py) {
+    const aspect = width / height;
+    return {
+      x: ((px / width) * 2 - 1) * 3.6 * aspect,
+      y: (1 - (py / height) * 2) * 3.6
+    };
+  }
+
+  function setPreset() {
+    const preset = ui.preset.value;
+    if (preset === 'pair') {
+      wires = [
+        { x: -1.15, y: 0, I: 1 },
+        { x: 1.15, y: 0, I: -1 }
+      ];
+    }
+    if (preset === 'same') {
+      wires = [
+        { x: -1.15, y: 0, I: 1 },
+        { x: 1.15, y: 0, I: 1 }
+      ];
+    }
+    if (preset === 'quadrupole') {
+      wires = [
+        { x: -1.35, y: -1.0, I: 1 },
+        { x: 1.35, y: -1.0, I: -1 },
+        { x: -1.35, y: 1.0, I: -1 },
+        { x: 1.35, y: 1.0, I: 1 }
+      ];
+    }
+    if (preset === 'array') {
+      wires = Array.from({ length: 7 }, (_, i) => ({
+        x: -2.4 + i * 0.8,
+        y: i % 2 ? 0.72 : -0.72,
+        I: i % 2 ? -1 : 1
+      }));
+    }
+    selected = Math.min(selected, wires.length - 1);
+    syncLabels();
+  }
+
+  function syncLabels() {
+    const p = params();
+    ui.currentVal.textContent = p.current.toFixed(2);
+    ui.densityVal.textContent = String(p.density);
+    ui.softVal.textContent = p.soft.toFixed(2);
+    ui.linesVal.textContent = String(p.lines);
+    ui.statWires.textContent = String(wires.length);
+    const net = wires.reduce((sum, wire) => sum + wire.I * p.current, 0);
+    ui.statNet.textContent = net.toFixed(1);
+    ui.statSelected.textContent = wires.length ? String(selected + 1) : '--';
+  }
+
+  function fieldAt(x, y) {
+    const p = params();
+    let bx = 0;
+    let by = 0;
+    for (const wire of wires) {
+      const dx = x - wire.x;
+      const dy = y - wire.y;
+      const r2 = dx * dx + dy * dy + p.soft * p.soft;
+      const strength = wire.I * p.current / r2;
+      bx += -dy * strength;
+      by += dx * strength;
+    }
+    return { bx, by, mag: Math.hypot(bx, by) };
+  }
+
+  function drawHeatmap() {
+    const hw = heatCanvas.width;
+    const hh = heatCanvas.height;
+    const img = heatCtx.createImageData(hw, hh);
+    const data = img.data;
+    let localMax = 0;
+
+    for (let y = 0; y < hh; y++) {
+      for (let x = 0; x < hw; x++) {
+        const world = worldFromScreen((x / (hw - 1)) * width, (y / (hh - 1)) * height);
+        const field = fieldAt(world.x, world.y);
+        localMax = Math.max(localMax, field.mag);
+        const m = Math.min(1, Math.log1p(field.mag * 1.5) / 2.2);
+        const i = (y * hw + x) * 4;
+        data[i] = 6 + 238 * Math.pow(m, 1.6);
+        data[i + 1] = 12 + 160 * m;
+        data[i + 2] = 22 + 218 * (1 - Math.abs(m - 0.62));
+        data[i + 3] = 255;
+      }
+    }
+    maxField = localMax;
+    ui.statMax.textContent = maxField.toFixed(1);
+    heatCtx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(heatCanvas, 0, 0, width, height);
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = '#07090d';
+    ctx.fillRect(0, 0, width, height);
+    if (layers.heat) drawHeatmap();
+    ctx.strokeStyle = 'rgba(238,244,242,0.055)';
+    ctx.lineWidth = 1;
+    const step = 58;
+    for (let x = 0; x < width; x += step) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    for (let y = 0; y < height; y += step) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+  }
+
+  function drawArrow(x, y, angle, length, color, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 1.35;
+    ctx.beginPath();
+    ctx.moveTo(-length * 0.45, 0);
+    ctx.lineTo(length * 0.45, 0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(length * 0.45, 0);
+    ctx.lineTo(length * 0.18, -length * 0.16);
+    ctx.lineTo(length * 0.18, length * 0.16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawVectors() {
+    if (!layers.vectors) return;
+    const p = params();
+    const cols = p.density;
+    const rows = Math.max(7, Math.round(cols * height / width));
+    for (let iy = 0; iy < rows; iy++) {
+      for (let ix = 0; ix < cols; ix++) {
+        const sx = width * (ix + 0.5) / cols;
+        const sy = height * (iy + 0.5) / rows;
+        const world = worldFromScreen(sx, sy);
+        const field = fieldAt(world.x, world.y);
+        if (field.mag < 0.002) continue;
+        const angle = Math.atan2(-field.by, field.bx);
+        const length = 10 + Math.min(17, Math.log1p(field.mag * 2) * 12);
+        const alpha = 0.35 + Math.min(0.55, field.mag / (maxField + 0.001));
+        drawArrow(sx, sy, angle, length, field.by > 0 ? colors.positive : colors.negative, alpha);
+      }
+    }
+  }
+
+  function traceLine(startX, startY, direction, color) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    let x = startX;
+    let y = startY;
+    let started = false;
+    for (let i = 0; i < 260; i++) {
+      const field = fieldAt(x, y);
+      if (field.mag < 0.0005) break;
+      const step = 0.035 * direction;
+      x += field.bx / field.mag * step;
+      y += field.by / field.mag * step;
+      const [sx, sy] = screenFromWorld(x, y);
+      if (sx < -20 || sx > width + 20 || sy < -20 || sy > height + 20) break;
+      if (!started) {
+        ctx.moveTo(sx, sy);
+        started = true;
+      } else {
+        ctx.lineTo(sx, sy);
+      }
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawFieldLines() {
+    if (!layers.lines) return;
+    const count = params().lines;
+    if (!count) return;
+    wires.forEach((wire) => {
+      const around = Math.max(4, Math.floor(count / Math.max(1, wires.length)));
+      for (let i = 0; i < around; i++) {
+        const a = Math.PI * 2 * i / around;
+        const radius = 0.28;
+        const sx = wire.x + Math.cos(a) * radius;
+        const sy = wire.y + Math.sin(a) * radius;
+        traceLine(sx, sy, wire.I >= 0 ? 1 : -1, wire.I >= 0 ? colors.positive : colors.negative);
+      }
+    });
+  }
+
+  function drawWires() {
+    wires.forEach((wire, index) => {
+      const [x, y] = screenFromWorld(wire.x, wire.y);
+      const color = wire.I >= 0 ? colors.positive : colors.negative;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, index === selected ? 17 : 14, 0, Math.PI * 2);
+      ctx.fillStyle = '#050608';
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = index === selected ? 2.4 : 1.6;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 16;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      if (wire.I >= 0) {
+        ctx.beginPath();
+        ctx.arc(x, y, 4.3, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(x - 5, y - 5);
+        ctx.lineTo(x + 5, y + 5);
+        ctx.moveTo(x + 5, y - 5);
+        ctx.lineTo(x - 5, y + 5);
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(238,244,242,0.8)';
+      ctx.font = '700 10px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(index + 1), x, y + 28);
+      ctx.restore();
+    });
+  }
+
+  function draw() {
+    drawBackground();
+    drawFieldLines();
+    drawVectors();
+    drawWires();
+    requestAnimationFrame(draw);
+  }
+
+  function nearestWire(px, py) {
+    let best = -1;
+    let bestDist = 30;
+    wires.forEach((wire, index) => {
+      const [x, y] = screenFromWorld(wire.x, wire.y);
+      const dist = Math.hypot(px - x, py - y);
+      if (dist < bestDist) {
+        best = index;
+        bestDist = dist;
+      }
+    });
+    return best;
+  }
+
+  function addWire(world) {
+    wires.push({ x: world.x, y: world.y, I: wires.length % 2 ? -1 : 1 });
+    selected = wires.length - 1;
+    syncLabels();
+    ui.readout.textContent = 'Wire added';
+  }
+
+  canvas.addEventListener('pointerdown', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const px = event.clientX - rect.left;
+    const py = event.clientY - rect.top;
+    const hit = nearestWire(px, py);
+    if (hit >= 0) {
+      selected = hit;
+      dragging = true;
+      ui.readout.textContent = 'Dragging wire ' + (selected + 1);
+      syncLabels();
+      return;
+    }
+    addWire(worldFromScreen(px, py));
+  });
+
+  canvas.addEventListener('pointermove', (event) => {
+    if (!dragging || !wires[selected]) return;
+    const rect = canvas.getBoundingClientRect();
+    const world = worldFromScreen(event.clientX - rect.left, event.clientY - rect.top);
+    wires[selected].x = world.x;
+    wires[selected].y = world.y;
+  });
+
+  window.addEventListener('pointerup', () => {
+    if (dragging) ui.readout.textContent = 'Drag wires or click to add';
+    dragging = false;
+  });
+
+  ui.preset.addEventListener('change', setPreset);
+  [ui.current, ui.density, ui.soft, ui.lines].forEach((input) => input.addEventListener('input', syncLabels));
+  ui.heat.addEventListener('click', () => {
+    layers.heat = !layers.heat;
+    ui.heat.classList.toggle('is-active', layers.heat);
+  });
+  ui.vectors.addEventListener('click', () => {
+    layers.vectors = !layers.vectors;
+    ui.vectors.classList.toggle('is-active', layers.vectors);
+  });
+  ui.lineToggle.addEventListener('click', () => {
+    layers.lines = !layers.lines;
+    ui.lineToggle.classList.toggle('is-active', layers.lines);
+  });
+  ui.reset.addEventListener('click', setPreset);
+  ui.clear.addEventListener('click', () => {
+    wires = [];
+    selected = 0;
+    syncLabels();
+    ui.readout.textContent = 'Cleared';
+  });
+  ui.reverse.addEventListener('click', () => {
+    if (!wires[selected]) return;
+    wires[selected].I *= -1;
+    syncLabels();
+    ui.readout.textContent = 'Reversed wire ' + (selected + 1);
+  });
+  window.addEventListener('resize', resize);
+
+  resize();
+  setPreset();
+  syncLabels();
+  requestAnimationFrame(draw);
+})();
+</script>

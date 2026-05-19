@@ -12,7 +12,7 @@ description: Jack Little - Engineering Physics student, computational physicist,
       <h1>Physics you can touch.</h1>
       <p>
         I build interactive simulations for gravitational dynamics, Fourier analysis,
-        numerical methods, and black hole geodesics - turning math into systems you can explore.
+        quantum mechanics, numerical methods, and black hole geodesics - turning math into systems you can explore.
       </p>
       <div class="hero-actions">
         <a href="{{ '/projects/' | relative_url }}" class="btn btn--accent">Explore simulations</a>
@@ -21,7 +21,7 @@ description: Jack Little - Engineering Physics student, computational physicist,
 
       <div class="hero-meta" aria-label="Portfolio highlights">
         <div>
-          <span class="metric-value">6</span>
+          <span class="metric-value">7</span>
           <span class="metric-label">Interactive physics labs</span>
         </div>
         <div>
@@ -131,12 +131,31 @@ description: Jack Little - Engineering Physics student, computational physicist,
         </div>
       </a>
 
-      <a href="{{ '/sims/wave/' | relative_url }}" class="project-card project-card--quiet">
+      <a href="{{ '/sims/tunneling/' | relative_url }}" class="project-card">
         <div>
-          <span class="badge badge--wip">Preview</span>
+          <span class="badge badge--done">New</span>
+          <span class="label">Quantum mechanics</span>
+          <h3>Quantum Tunneling Lab</h3>
+          <p>Adjust energy, barrier height, width, and mass to inspect transmission, reflection, and wavefunction behavior.</p>
+        </div>
+        <div class="project-visual">
+          <span class="mini-tunnel">
+            <span style="--y:-10;--r:6"></span><span style="--y:7;--r:-5"></span>
+          </span>
+        </div>
+        <div class="project-tags">
+          <span class="tag">Quantum</span>
+          <span class="tag">Barrier</span>
+          <span class="tag">Wavefunction</span>
+        </div>
+      </a>
+
+      <a href="{{ '/sims/wave/' | relative_url }}" class="project-card">
+        <div>
+          <span class="badge badge--done">New</span>
           <span class="label">Wave mechanics</span>
           <h3>Wave Interference</h3>
-          <p>A visual page for superposition, constructive interference, and destructive interference work in progress.</p>
+          <p>Add point sources and watch circular waves reinforce, cancel, and form live interference bands.</p>
         </div>
         <div class="project-visual"><span class="mini-wave"><span></span><span></span></span></div>
         <div class="project-tags">
@@ -145,12 +164,12 @@ description: Jack Little - Engineering Physics student, computational physicist,
         </div>
       </a>
 
-      <a href="{{ '/sims/field/' | relative_url }}" class="project-card project-card--quiet">
+      <a href="{{ '/sims/field/' | relative_url }}" class="project-card">
         <div>
-          <span class="badge badge--wip">Preview</span>
+          <span class="badge badge--done">New</span>
           <span class="label">Electromagnetism</span>
           <h3>Magnetic Field Explorer</h3>
-          <p>A vector-field interface for current-carrying conductors and Biot-Savart visualization.</p>
+          <p>Place current-carrying wires and inspect Biot-Savart vector arrows, heatmaps, and field lines.</p>
         </div>
         <div class="project-visual">
           <span class="mini-field">

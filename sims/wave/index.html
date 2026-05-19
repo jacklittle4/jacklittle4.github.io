@@ -2,46 +2,459 @@
 layout: default
 title: Wave Interference Simulator
 permalink: /sims/wave/
-description: Preview page for a point-source wave interference simulator.
+description: Interactive point-source wave interference simulator with live superposition patterns.
 ---
 
 <section class="page-hero">
   <div class="wrap">
     <div>
       <div class="hero-kicker">
-        <span class="badge badge--wip">Preview</span>
+        <span class="badge badge--done">New</span>
         <span class="label">Wave mechanics</span>
       </div>
       <h1>Wave Interference Simulator.</h1>
       <p>
-        A visual shell for point-source superposition, constructive interference,
-        and destructive interference. This page now matches the finished simulation design.
+        Add point sources and watch their circular waves superpose in real time.
+        Bright ridges mark constructive interference; dark bands mark destructive interference.
       </p>
     </div>
     <aside class="hero-aside">
-      <p>Next build target: interactive sources and wavelength controls.</p>
+      <p>Scalar wave field: sum A sin(kr - omega t + phase).</p>
     </aside>
   </div>
 </section>
 
 <section class="section section--tight">
   <div class="wrap">
-    <div class="grid-2">
-      <div class="card">
-        <span class="label">Model plan</span>
-        <h3>Superposition field</h3>
-        <p>
-          The finished version will calculate the sum of multiple circular waves across a 2D field,
-          with source phase, wavelength, amplitude, and damping controls.
-        </p>
-        <div class="button-row">
-          <a href="{{ '/projects/' | relative_url }}" class="btn">Back to projects</a>
-          <a href="{{ '/sims/numerical/' | relative_url }}" class="btn btn--accent">Numerical methods</a>
+    <div class="sim-shell">
+      <div class="sim-stage">
+        <canvas id="waveCanvas" class="sim-canvas"></canvas>
+        <div class="sim-overlay">
+          <div class="button-row" style="margin:0">
+            <button class="btn btn--small" id="wavePause" type="button">Pause</button>
+            <button class="btn btn--small" id="waveReset" type="button">Reset</button>
+            <button class="btn btn--small" id="waveRandom" type="button">Random phase</button>
+          </div>
+          <span class="sim-readout" id="waveReadout">Running</span>
         </div>
       </div>
-      <div class="project-visual" style="min-height:320px">
-        <span class="mini-wave"><span></span><span></span></span>
-      </div>
+
+      <aside class="sim-controls" aria-label="Wave controls">
+        <div class="control-group">
+          <label for="wavePreset">Preset</label>
+          <select id="wavePreset">
+            <option value="double" selected>Double slit</option>
+            <option value="triangle">Three-source lattice</option>
+            <option value="line">Linear array</option>
+            <option value="chaos">Mixed phases</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="waveSources">Sources <span id="waveSourcesVal">2</span></label>
+          <input type="range" id="waveSources" min="1" max="8" step="1" value="2">
+        </div>
+
+        <div class="control-group">
+          <label for="waveLength">Wavelength <span id="waveLengthVal">1.25</span></label>
+          <input type="range" id="waveLength" min="0.45" max="3.0" step="0.05" value="1.25">
+        </div>
+
+        <div class="control-group">
+          <label for="waveFreq">Frequency <span id="waveFreqVal">1.10</span></label>
+          <input type="range" id="waveFreq" min="0.15" max="2.5" step="0.05" value="1.10">
+        </div>
+
+        <div class="control-group">
+          <label for="waveAmp">Amplitude <span id="waveAmpVal">1.00</span></label>
+          <input type="range" id="waveAmp" min="0.2" max="1.8" step="0.05" value="1.00">
+        </div>
+
+        <div class="control-group">
+          <label for="waveDamping">Damping <span id="waveDampingVal">0.20</span></label>
+          <input type="range" id="waveDamping" min="0" max="0.85" step="0.01" value="0.20">
+        </div>
+
+        <div class="control-group">
+          <label for="waveContrast">Contrast <span id="waveContrastVal">1.25</span></label>
+          <input type="range" id="waveContrast" min="0.6" max="2.4" step="0.05" value="1.25">
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="sim-stat-val" id="waveStatSources">2</div>
+            <div class="sim-stat-label">Sources</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="waveStatLambda">1.25</div>
+            <div class="sim-stat-label">Lambda</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="waveStatNodes">0</div>
+            <div class="sim-stat-label">Nodes</div>
+          </div>
+          <div class="stat-card">
+            <div class="sim-stat-val" id="waveStatTime">0.0</div>
+            <div class="sim-stat-label">Time</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <p class="hint" style="margin-top:1rem">Click the canvas to place a new source. Click near an existing source to move it.</p>
+  </div>
+</section>
+
+<section class="section band">
+  <div class="wrap">
+    <div class="grid-2">
+      <article class="card">
+        <span class="label">Superposition</span>
+        <h3>Adding amplitudes</h3>
+        <p>
+          Each source emits a circular wave. The field value at every point is the sum
+          of all source amplitudes, so peaks can reinforce or cancel.
+        </p>
+      </article>
+      <article class="card">
+        <span class="label">Interference</span>
+        <h3>Phase differences</h3>
+        <p>
+          When two waves arrive in phase, the pattern brightens. When they arrive out of phase,
+          the field crosses through a node and forms a dark interference band.
+        </p>
+      </article>
     </div>
   </div>
 </section>
+
+<script>
+(function () {
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const fieldCanvas = document.createElement('canvas');
+  const fieldCtx = fieldCanvas.getContext('2d');
+
+  const ui = {
+    preset: document.getElementById('wavePreset'),
+    sources: document.getElementById('waveSources'),
+    lambda: document.getElementById('waveLength'),
+    freq: document.getElementById('waveFreq'),
+    amp: document.getElementById('waveAmp'),
+    damping: document.getElementById('waveDamping'),
+    contrast: document.getElementById('waveContrast'),
+    sourcesVal: document.getElementById('waveSourcesVal'),
+    lambdaVal: document.getElementById('waveLengthVal'),
+    freqVal: document.getElementById('waveFreqVal'),
+    ampVal: document.getElementById('waveAmpVal'),
+    dampingVal: document.getElementById('waveDampingVal'),
+    contrastVal: document.getElementById('waveContrastVal'),
+    pause: document.getElementById('wavePause'),
+    reset: document.getElementById('waveReset'),
+    random: document.getElementById('waveRandom'),
+    readout: document.getElementById('waveReadout'),
+    statSources: document.getElementById('waveStatSources'),
+    statLambda: document.getElementById('waveStatLambda'),
+    statNodes: document.getElementById('waveStatNodes'),
+    statTime: document.getElementById('waveStatTime')
+  };
+
+  let width = 0;
+  let height = 0;
+  let t = 0;
+  let running = true;
+  let sources = [];
+  let dragging = -1;
+  let nodeEstimate = 0;
+
+  const colors = ['#6ee7f0', '#f4bd64', '#8cf5bd', '#ff7d90', '#b8a4ff', '#eef4f2', '#7cc7ff', '#ffc57a'];
+
+  function seeded(i, salt) {
+    const x = Math.sin(i * 91.7 + salt * 203.3) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function params() {
+    return {
+      lambda: parseFloat(ui.lambda.value),
+      freq: parseFloat(ui.freq.value),
+      amp: parseFloat(ui.amp.value),
+      damping: parseFloat(ui.damping.value),
+      contrast: parseFloat(ui.contrast.value),
+      count: parseInt(ui.sources.value, 10)
+    };
+  }
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    width = rect.width;
+    height = Math.max(rect.height, 620);
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const fieldWidth = Math.min(280, Math.max(160, Math.floor(width / 4)));
+    const fieldHeight = Math.max(120, Math.floor(fieldWidth * height / width));
+    fieldCanvas.width = fieldWidth;
+    fieldCanvas.height = fieldHeight;
+  }
+
+  function presetSources() {
+    const preset = ui.preset.value;
+    if (preset === 'double') {
+      sources = [
+        { x: -1.2, y: -1.0, phase: 0, color: colors[0] },
+        { x: -1.2, y: 1.0, phase: 0, color: colors[1] }
+      ];
+    }
+    if (preset === 'triangle') {
+      sources = [
+        { x: -1.35, y: -0.95, phase: 0, color: colors[0] },
+        { x: -1.35, y: 0.95, phase: 0, color: colors[1] },
+        { x: 0.35, y: 0, phase: Math.PI, color: colors[2] }
+      ];
+    }
+    if (preset === 'line') {
+      sources = Array.from({ length: 5 }, (_, i) => ({
+        x: -1.75,
+        y: -1.6 + i * 0.8,
+        phase: 0,
+        color: colors[i % colors.length]
+      }));
+    }
+    if (preset === 'chaos') {
+      sources = Array.from({ length: 6 }, (_, i) => ({
+        x: -2.0 + seeded(i, 1) * 4,
+        y: -1.65 + seeded(i, 2) * 3.3,
+        phase: seeded(i, 3) * Math.PI * 2,
+        color: colors[i % colors.length]
+      }));
+    }
+    ui.sources.value = sources.length;
+    syncLabels();
+  }
+
+  function syncLabels() {
+    const p = params();
+    ui.sourcesVal.textContent = String(p.count);
+    ui.lambdaVal.textContent = p.lambda.toFixed(2);
+    ui.freqVal.textContent = p.freq.toFixed(2);
+    ui.ampVal.textContent = p.amp.toFixed(2);
+    ui.dampingVal.textContent = p.damping.toFixed(2);
+    ui.contrastVal.textContent = p.contrast.toFixed(2);
+    ui.statSources.textContent = String(sources.length);
+    ui.statLambda.textContent = p.lambda.toFixed(2);
+  }
+
+  function syncSourceCount() {
+    const count = parseInt(ui.sources.value, 10);
+    while (sources.length < count) {
+      const i = sources.length;
+      sources.push({
+        x: -2 + seeded(i + 10, 1) * 4,
+        y: -1.7 + seeded(i + 10, 2) * 3.4,
+        phase: seeded(i + 10, 3) * Math.PI * 2,
+        color: colors[i % colors.length]
+      });
+    }
+    while (sources.length > count) sources.pop();
+    syncLabels();
+  }
+
+  function worldFromScreen(px, py) {
+    const aspect = width / height;
+    const x = ((px / width) * 2 - 1) * 3.2 * aspect;
+    const y = (1 - (py / height) * 2) * 3.2;
+    return { x, y };
+  }
+
+  function screenFromWorld(x, y) {
+    const aspect = width / height;
+    return [
+      width * (0.5 + x / (6.4 * aspect)),
+      height * (0.5 - y / 6.4)
+    ];
+  }
+
+  function drawField() {
+    const p = params();
+    const fw = fieldCanvas.width;
+    const fh = fieldCanvas.height;
+    const img = fieldCtx.createImageData(fw, fh);
+    const data = img.data;
+    const aspect = width / height;
+    const k = Math.PI * 2 / p.lambda;
+    const omega = Math.PI * 2 * p.freq;
+    let nodeCount = 0;
+
+    for (let y = 0; y < fh; y++) {
+      for (let x = 0; x < fw; x++) {
+        const wx = ((x / (fw - 1)) * 2 - 1) * 3.2 * aspect;
+        const wy = (1 - (y / (fh - 1)) * 2) * 3.2;
+        let value = 0;
+        for (const source of sources) {
+          const dx = wx - source.x;
+          const dy = wy - source.y;
+          const r = Math.sqrt(dx * dx + dy * dy) + 0.001;
+          const envelope = p.amp / (1 + p.damping * r * r);
+          value += envelope * Math.sin(k * r - omega * t + source.phase);
+        }
+        value /= Math.max(1, sources.length);
+        value = Math.max(-1, Math.min(1, value * p.contrast));
+        if (Math.abs(value) < 0.018) nodeCount++;
+
+        const i = (y * fw + x) * 4;
+        const a = Math.abs(value);
+        if (value >= 0) {
+          data[i] = 8 + 92 * a;
+          data[i + 1] = 28 + 210 * a;
+          data[i + 2] = 44 + 220 * a;
+        } else {
+          data[i] = 40 + 230 * a;
+          data[i + 1] = 18 + 135 * a;
+          data[i + 2] = 42 + 85 * a;
+        }
+        data[i + 3] = 255;
+      }
+    }
+    fieldCtx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(fieldCanvas, 0, 0, width, height);
+    nodeEstimate = Math.round(nodeCount / (fw * fh) * 100);
+  }
+
+  function drawGrid() {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(238,244,242,0.06)';
+    ctx.lineWidth = 1;
+    const step = 58;
+    for (let x = 0; x < width; x += step) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    for (let y = 0; y < height; y += step) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSources() {
+    sources.forEach((source, index) => {
+      const [x, y] = screenFromWorld(source.x, source.y);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, 13, 0, Math.PI * 2);
+      ctx.fillStyle = '#050608';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = source.color;
+      ctx.shadowColor = source.color;
+      ctx.shadowBlur = 16;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = source.color;
+      ctx.font = '700 10px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(index + 1), x, y + 0.5);
+      ctx.restore();
+    });
+  }
+
+  function draw() {
+    if (running) t += 0.012;
+    drawField();
+    drawGrid();
+    drawSources();
+    ui.statNodes.textContent = nodeEstimate + '%';
+    ui.statTime.textContent = t.toFixed(1);
+    requestAnimationFrame(draw);
+  }
+
+  function nearestSource(px, py) {
+    let best = -1;
+    let bestDist = 28;
+    sources.forEach((source, index) => {
+      const [x, y] = screenFromWorld(source.x, source.y);
+      const dist = Math.hypot(px - x, py - y);
+      if (dist < bestDist) {
+        best = index;
+        bestDist = dist;
+      }
+    });
+    return best;
+  }
+
+  function placeSource(event) {
+    const rect = canvas.getBoundingClientRect();
+    const px = event.clientX - rect.left;
+    const py = event.clientY - rect.top;
+    const world = worldFromScreen(px, py);
+    const target = nearestSource(px, py);
+    if (target >= 0) {
+      sources[target].x = world.x;
+      sources[target].y = world.y;
+      return;
+    }
+    sources.push({
+      x: world.x,
+      y: world.y,
+      phase: sources.length % 2 ? Math.PI : 0,
+      color: colors[sources.length % colors.length]
+    });
+    if (sources.length > 8) sources.shift();
+    ui.sources.value = sources.length;
+    syncLabels();
+  }
+
+  [ui.lambda, ui.freq, ui.amp, ui.damping, ui.contrast].forEach((input) => {
+    input.addEventListener('input', syncLabels);
+  });
+  ui.sources.addEventListener('input', syncSourceCount);
+  ui.preset.addEventListener('change', presetSources);
+  ui.pause.addEventListener('click', () => {
+    running = !running;
+    ui.pause.textContent = running ? 'Pause' : 'Run';
+    ui.pause.classList.toggle('is-active', !running);
+    ui.readout.textContent = running ? 'Running' : 'Paused';
+  });
+  ui.reset.addEventListener('click', () => {
+    t = 0;
+    presetSources();
+    ui.readout.textContent = 'Reset';
+  });
+  ui.random.addEventListener('click', () => {
+    sources.forEach((source, index) => {
+      source.phase = seeded(index, t + 20) * Math.PI * 2;
+    });
+    ui.readout.textContent = 'Phases randomized';
+  });
+  canvas.addEventListener('pointerdown', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    dragging = nearestSource(event.clientX - rect.left, event.clientY - rect.top);
+    if (dragging < 0) placeSource(event);
+  });
+  canvas.addEventListener('pointermove', (event) => {
+    if (dragging < 0) return;
+    const rect = canvas.getBoundingClientRect();
+    const world = worldFromScreen(event.clientX - rect.left, event.clientY - rect.top);
+    sources[dragging].x = world.x;
+    sources[dragging].y = world.y;
+  });
+  window.addEventListener('pointerup', () => { dragging = -1; });
+  window.addEventListener('resize', resize);
+
+  resize();
+  presetSources();
+  syncLabels();
+  requestAnimationFrame(draw);
+})();
+</script>
